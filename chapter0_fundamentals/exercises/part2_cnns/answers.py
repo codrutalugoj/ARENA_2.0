@@ -81,7 +81,62 @@ if MAIN:
     display_array_as_img(arr7)
 
 # %% 
-arr8 = einops.reduce(arr.astype(float), "b c h w -> h (b w)", 'mean')
+arr8 = einops.reduce(arr.astype(float), "b c h w -> h w", 'min')
 
 if MAIN:
     display_array_as_img(arr8)
+
+# %% 
+arr9 = einops.rearrange(arr[1], "c h w -> c w h")
+
+if MAIN:
+    display_array_as_img(arr9)
+
+# %% 
+arr10 = einops.reduce(arr, "(b1 b2) c (h 2) (w 2) -> c (b1 h) (b2 w)", 'max', b1=2)
+
+if MAIN:
+    display_array_as_img(arr10)
+
+
+###### EINSUM
+
+# %%
+def einsum_trace(mat: np.ndarray):
+    '''
+    Returns the same as `np.trace`. i.e. the sum of diagonals of the array
+    '''
+    return einops.einsum(mat, np.eye(mat.shape[-1]), "i i, i i ->")
+
+def einsum_mv(mat: np.ndarray, vec: np.ndarray):
+    '''
+    Returns the same as `np.matmul`, when `mat` is a 2D array and `vec` is 1D.
+    '''
+    return einops.einsum(mat, vec, "j i, i -> j")
+
+def einsum_mm(mat1: np.ndarray, mat2: np.ndarray):
+    '''
+    Returns the same as `np.matmul`, when `mat1` and `mat2` are both 2D arrays.
+    '''
+    return einops.einsum(mat1, mat2, "i k, k j -> i j")
+
+def einsum_inner(vec1: np.ndarray, vec2: np.ndarray):
+    '''
+    Returns the same as `np.inner`.
+    '''
+    return einops.einsum(vec1, vec2, "i, i ->")
+
+def einsum_outer(vec1: np.ndarray, vec2: np.ndarray):
+    '''
+    Returns the same as `np.outer`.
+    '''
+    return einops.einsum(vec1, vec2, "i, j -> i j")
+
+
+if MAIN:
+    tests.test_einsum_trace(einsum_trace)
+    tests.test_einsum_mv(einsum_mv)
+    tests.test_einsum_mm(einsum_mm)
+    tests.test_einsum_inner(einsum_inner)
+    tests.test_einsum_outer(einsum_outer)
+
