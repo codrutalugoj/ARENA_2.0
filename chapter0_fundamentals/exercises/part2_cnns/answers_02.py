@@ -110,10 +110,9 @@ if MAIN:
 
 
 # %%
-out = t.tensor([[0, 1, 2, 3, 4],
-               [0, 1, 2, 3, 4]])
+out = t.tensor([[0, 1, 2, 3, 4]])
 
-print(test_input.as_strided(size=(4, 2, 5), stride=(5, 0, 0)))
+print(out.as_strided(size=(3, 5), stride=(0, 1)))
 
 # %%
 import tests
