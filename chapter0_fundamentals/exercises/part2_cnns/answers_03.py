@@ -256,7 +256,7 @@ if MAIN:
 
 
 # %%
-# BUGGY
+
 def maxpool2d(
     x: Float[Tensor, "b ic h w"], 
     kernel_size: IntOrPair, 
@@ -285,7 +285,7 @@ def maxpool2d(
     ow = (w + 2*padding_w - kw)//stride_w + 1
 
     x_padded = pad2d(x, left=padding_w, top=padding_h, right=padding_w, bottom=padding_h, pad_value=-t.inf)
-    s_b, s_ic, s_h, s_w = x.stride()
+    s_b, s_ic, s_h, s_w = x_padded.stride()
 
     new_size = (b, ic, oh, ow, kh, kw)
     new_stride = (s_b, s_ic, s_h*stride_h, s_w*stride_w, s_h, s_w)
