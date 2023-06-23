@@ -109,10 +109,10 @@ for i in range(10):
 batch = 1
 position = 35
 d_model = 768
-n_heads = 12
+nheads = 12
 n_layers = 12
 d_mlp = 3072 # (= 4 * d_model)
-d_head = 64#  (= d_model / n_heads)
+d_head = 64#  (= d_model / nheads)
 
 
 # %%
@@ -142,7 +142,7 @@ class Config:
     n_ctx: int = 1024
     d_head: int = 64
     d_mlp: int = 3072
-    n_heads: int = 12
+    nheads: int = 12
     n_layers: int = 12
 
 
@@ -265,23 +265,62 @@ class Attention(nn.Module):
         self.register_buffer("IGNORE", t.tensor(-1e5, dtype=t.float32, device=device))
 
     def forward(
-        self, normalized_resid_pre: Float[Tensor, "batch posn d_model"]
-    ) -> Float[Tensor, "batch posn d_model"]:
-        # input -> key
-        print(self.W_K.shape, normalized_resid_pre.shape, self.W_K.transpose(1, 0).shape)
-        K = self.W_K.transpose(1, 0) * normalized_resid_pre
-        # input -> query
-        Q = normalized_resid_pre * self.W_Q
-        print(K.shape, Q.shape)
+        self, normalized_resid_pre: Float[Tensor, "batch seq_len d_model"]
+    ) -> Float[Tensor, "batch seq_len d_model"]:
+        # Calculate key, query, value vectors 
+        K = einops.einsum(normalized_resid_pre, 
+                          self.W_K, 
+                          "b seq_len d_model, nheads d_model d_head -> b seq_len nheads d_head") + self.b_K
+        Q = einops.einsum(normalized_resid_pre, 
+                          self.W_Q, 
+                          "b seq_len d_model, nheads d_model d_head -> b seq_len nheads d_head") + self.b_Q
 
+        # Compute attention scores by calculating the dot product for every key,query pair
+        # query = destination
+        # key = source
+        attn_scores = einops.einsum(Q, K, "b seq_q nheads d_head, b seq_k nheads d_head -> b nheads seq_q seq_k")
+        # scaling with sqrt(d_head)
+        attn_scores = attn_scores / np.sqrt(self.cfg.d_head)
+        attn_scores = self.apply_causal_mask(attn_scores)
+
+        attn_pattern = t.softmax(attn_scores, dim=-1)
+
+        # Computing values
+        V = einops.einsum(normalized_resid_pre, 
+                          self.W_V, 
+                          "b seq_k d_model, nheads d_model d_head -> b seq_k nheads d_head") + self.b_V
+
+        # weighted avg of values on seq_k dim
+        z = einops.einsum(attn_pattern, V, 
+                          "b nheads seq_q seq_k, b seq_k nheads d_head -> b seq_q nheads d_head")
+
+        attn_out = einops.einsum(z, 
+                            self.W_O, 
+                            "b seq_q nheads d_head, nheads d_head d_model -> b seq_q d_model") + self.b_O
+
+        return attn_out
+
+    
     def apply_causal_mask(
-        self, attn_scores: Float[Tensor, "batch n_heads query_pos key_pos"]
-    ) -> Float[Tensor, "batch n_heads query_pos key_pos"]:
+        self, attn_scores: Float[Tensor, "batch nheads query_pos key_pos"]
+    ) -> Float[Tensor, "batch nheads query_pos key_pos"]:
         '''
         Applies a causal mask to attention scores, and returns masked scores.
         '''
-        pass
+        #attn_scores2 = attn_scores
+
+        mask = t.ones((attn_scores.size(-2), attn_scores.size(-1)), device=attn_scores.device)
+        mask = t.triu(mask, diagonal=1).bool()
+
+        attn_scores.masked_fill_(mask, self.IGNORE)
+
+        
+        return attn_scores
 
 
 rand_float_test(Attention, [2, 4, 768])
 load_gpt2_test(Attention, reference_gpt2.blocks[0].attn, cache["normalized", 0, "ln1"])
+
+
+
+
