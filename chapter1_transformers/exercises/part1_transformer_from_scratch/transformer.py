@@ -142,7 +142,7 @@ class Config:
     n_ctx: int = 1024
     d_head: int = 64
     d_mlp: int = 3072
-    nheads: int = 12
+    n_heads: int = 12
     n_layers: int = 12
 
 
@@ -250,13 +250,13 @@ class Attention(nn.Module):
     def __init__(self, cfg: Config):
         super().__init__()
         self.cfg = cfg
-        self.W_Q = nn.Parameter(t.empty((cfg.nheads, cfg.d_model, cfg.d_head)))
-        self.W_K = nn.Parameter(t.empty((cfg.nheads, cfg.d_model, cfg.d_head)))
-        self.W_V = nn.Parameter(t.empty((cfg.nheads, cfg.d_model, cfg.d_head)))
-        self.W_O = nn.Parameter(t.empty((cfg.nheads, cfg.d_head, cfg.d_model)))
-        self.b_Q = nn.Parameter(t.zeros((cfg.nheads, cfg.d_head)))
-        self.b_K = nn.Parameter(t.zeros((cfg.nheads, cfg.d_head)))
-        self.b_V = nn.Parameter(t.zeros((cfg.nheads, cfg.d_head)))
+        self.W_Q = nn.Parameter(t.empty((cfg.n_heads, cfg.d_model, cfg.d_head)))
+        self.W_K = nn.Parameter(t.empty((cfg.n_heads, cfg.d_model, cfg.d_head)))
+        self.W_V = nn.Parameter(t.empty((cfg.n_heads, cfg.d_model, cfg.d_head)))
+        self.W_O = nn.Parameter(t.empty((cfg.n_heads, cfg.d_head, cfg.d_model)))
+        self.b_Q = nn.Parameter(t.zeros((cfg.n_heads, cfg.d_head)))
+        self.b_K = nn.Parameter(t.zeros((cfg.n_heads, cfg.d_head)))
+        self.b_V = nn.Parameter(t.zeros((cfg.n_heads, cfg.d_head)))
         self.b_O = nn.Parameter(t.zeros((cfg.d_model)))
         nn.init.normal_(self.W_Q, std=self.cfg.init_range)
         nn.init.normal_(self.W_K, std=self.cfg.init_range)
