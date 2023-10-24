@@ -342,33 +342,24 @@ plot_square_as_board(
 
 # %%
 #  YOUR CODE HERE - define the `cosine_similarities` tensor, to be plotted
-full_linear_probe_black_odd = full_linear_probe[1, ..., 1]
-full_linear_probe_white_odd = full_linear_probe[1, ..., 2]
 
-full_linear_probe_black_even = full_linear_probe[2, ..., 1]
-full_linear_probe_white_even = full_linear_probe[2, ..., 2]
 
-norm_black_odd = einops.einsum(full_linear_probe_black_odd, full_linear_probe_black_odd, "d_model row col, d_model row col -> row col").sqrt()
-norm_white_odd = einops.einsum(full_linear_probe_white_odd, full_linear_probe_white_odd, "d_model row col, d_model row col -> row col").sqrt()
+# Compute cosine similarities for black to play (i.e. mode = 1)
+probe_b2p_odd_moves = full_linear_probe[0, ..., 1] - full_linear_probe[0, ..., 2]
+probe_b2p_even_moves = full_linear_probe[1, ..., 1] - full_linear_probe[1, ..., 2]
 
-norm_black_even = einops.einsum(full_linear_probe_black_even, full_linear_probe_black_even, "d_model row col, d_model row col -> row col").sqrt()
-norm_white_even = einops.einsum(full_linear_probe_white_even, full_linear_probe_white_even, "d_model row col, d_model row col -> row col").sqrt()
+probes = t.stack((probe_b2p_odd_moves, probe_b2p_even_moves), dim=0)
+probes = einops.rearrange(probes, 
+                          "modes d_model row col -> (modes row col) d_model")
+probes_normalized = probes/probes.norm(dim=-1, keepdim=True)
+cosine_similarities = einops.einsum(probes,
+                                    probes, 
+                                    "pos_square_y d_model, pos_square_x d_model -> pos_square_y pos_square_x")
 
-cosine_similarities_odd = einops.einsum(einops.einsum(full_linear_probe_black_odd, 1/norm_black_odd, "d_model row col, row col -> d_model row col"), 
-                                    einops.einsum(full_linear_probe_white_odd, 1/norm_white_odd, "d_model row col, row col -> d_model row col"), 
-                                    "d_model row col, d_model row col -> row col").flatten()
-cosine_similarities_even = einops.einsum(einops.einsum(full_linear_probe_black_even, 1/norm_black_even, "d_model row col, row col -> d_model row col"), 
-                                    einops.einsum(full_linear_probe_white_even, 1/norm_white_even, "d_model row col, row col -> d_model row col"), 
-                                    "d_model row col, d_model row col -> row col").flatten()
-
-cosine_similarities = t.hstack((cosine_similarities_odd, cosine_similarities_even))
-
-print(cosine_similarities[: :].shape)
-
-# %%
 imshow(
     cosine_similarities,
     title="Cosine Sim of B-W Linear Probe Directions by Cell",
     x=[f"{L} (O)" for L in full_board_labels] + [f"{L} (E)" for L in full_board_labels],
     y=[f"{L} (O)" for L in full_board_labels] + [f"{L} (E)" for L in full_board_labels],
 )
+
