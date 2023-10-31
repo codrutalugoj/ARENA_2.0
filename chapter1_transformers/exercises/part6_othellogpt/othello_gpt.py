@@ -499,3 +499,17 @@ scatter(
     facet_col=0, facet_labels=[f"Translate by {i}x" for i in scales], 
     color=color, color_name="Newly Legal", color_continuous_scale="Geyser"
 )
+
+
+##########################################################
+# PART 2 - LOOKING FOR MODULAR CIRCUITS
+
+
+# %%
+# Look at game 0, move 20 as a case study:
+game_index = 1
+move = 20
+layer = 6
+
+plot_single_board(focus_games_string[game_index, :move+1])
+plot_probe_outputs(layer, game_index, move)
