@@ -1,8 +1,13 @@
-
 import os, sys
 from pathlib import Path
 chapter = r"chapter1_transformers"
-instructions_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve()
+for instructions_dir in [
+    Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve(),
+    Path("/app/arena_2.0/chapter1_transformers/instructions").resolve(),
+    Path("/mount/src/arena_2.0/chapter1_transformers/instructions").resolve(),
+]:
+    if instructions_dir.exists():
+        break
 if str(instructions_dir) not in sys.path: sys.path.append(str(instructions_dir))
 os.chdir(instructions_dir)
 
@@ -13,6 +18,11 @@ st_dependencies.styling()
 
 import platform
 is_local = (platform.processor() != "")
+
+import streamlit_analytics
+streamlit_analytics.start_tracking()
+
+st.error("This is no longer the most updated version of these exercises: see [here](https://arena3-chapter1-transformer-interp.streamlit.app/) for the newest page.", icon="🚨")
 
 def section_0():
 
@@ -29,19 +39,20 @@ def section_0():
     <li class='margtop'><a class='contents-el' href='#setup'>Setup</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
+    st.markdown(
+r"""
+# [1.3] Indirect Object Identification
 
- <img src="https://raw.githubusercontent.com/callummcdougall/TransformerLens-intro/main/images/page_images/leaves.png" width="350">
-
-
-Colab: [**exercises**](https://colab.research.google.com/drive/1M4F9SU_vHUUCQkhmtWnmY2eomOJu5B5s) | [**solutions**](https://colab.research.google.com/drive/1AA0wj2sHoZwtmy82WXORcZzk9urL1lVA)
+### Colab: [**exercises**](https://colab.research.google.com/drive/1M4F9SU_vHUUCQkhmtWnmY2eomOJu5B5s) | [**solutions**](https://colab.research.google.com/drive/1AA0wj2sHoZwtmy82WXORcZzk9urL1lVA)
 
 Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
 
 You can toggle dark mode from the buttons on the top-right of this page.
+                
+Links to other chapters: [**(0) Fundamentals**](https://arena-ch0-fundamentals.streamlit.app/), [**(2) RL**](https://arena-ch2-rl.streamlit.app/).
 
+<img src="https://raw.githubusercontent.com/callummcdougall/TransformerLens-intro/main/images/page_images/leaves.png" width="350">
 
-# Indirect Object Identification
 
 
 ## Introduction
@@ -233,9 +244,9 @@ from transformer_lens.components import Embed, Unembed, LayerNorm, MLP
 t.set_grad_enabled(False)
 
 # Make sure exercises are in the path
-chapter = r"chapter1_transformers"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = (exercises_dir / "part3_indirect_object_identification").resolve()
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part3_indirect_object_identification', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
 
 from plotly_utils import imshow, line, scatter, bar
@@ -429,9 +440,9 @@ We'll later be evaluating how model performance differs upon performing various 
 
 ## Exercise - implement the performance evaluation function
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -772,9 +783,9 @@ We can now decompose the residual stream! First we apply a technique called the 
 
 ### Exercise - implement `residual_stack_to_logit_diff`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -973,7 +984,6 @@ def topk_of_Nd_tensor(tensor: Float[Tensor, "rows cols"], k: int):
     '''
     i = t.topk(tensor.flatten(), k).indices
     return np.array(np.unravel_index(utils.to_numpy(i), tensor.shape)).T.tolist()
-
 
 
 k = 3
@@ -1219,9 +1229,9 @@ print(f"Corrupted logit diff: {corrupted_logit_diff:.4f}")
 
 ### Exercise - create a metric
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~10 minutes on this exercise.
 ```
@@ -1330,9 +1340,9 @@ To be clear, the striking thing about this graph isn't that the first row is zer
 
 ### Exercise - implement head-to-residual patching
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠🟠
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵🔵
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -1494,9 +1504,9 @@ I only have suggestive evidence of this, and would love to see someone look into
 
 ### Exercise (optional) - implement head-to-block patching
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to ~10 minutes on this exercise. 
 
@@ -1612,9 +1622,9 @@ We see some of the heads that we observed in our attention plots at the end of l
 
 ### Exercise - implement head-to-head patching
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 10-15 minutes on this exercise. 
 
@@ -1767,9 +1777,9 @@ imshow(
 
 ### Exercise (optional) - implement head-to-head-input patching
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to ~10 minutes on this exercise. 
 
@@ -2051,6 +2061,9 @@ def section_4():
 <ul class="contents">
     <li class='margtop'><a class='contents-el' href='#setup'>Setup</a></li>
     <li class='margtop'><a class='contents-el' href='#what-is-path-patching'>What is path patching?</a></li>
+    <li><ul class="contents">
+        <li><a class='contents-el' href='#why-mlps'>Why MLPs</li>
+    </ul></li>
     <li class='margtop'><a class='contents-el' href='#path-patching:-name-mover-heads'>Path Patching: Name Mover Heads</a></li>
     <li><ul class="contents">
         <li><a class='contents-el' href='#exercise-implement-path-patching-to-the-final-residual-stream-value'><b>Exercise</b> - implement path patching to the final residual stream value</a></li>
@@ -2267,7 +2280,30 @@ Our 3-step process looks like the diagram below (remember green is corrupted, gr
 
 Why does this work? If you stare at the middle picture above for long enough, you'll realise that the contribution from every non-direct path from `0.0` $\to$ `2.0` is the same as it would be on the clean distribution, while all the direct paths' contributions are the same as they would be on the corrupted distribution. 
 
-<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/simpler-patching-path-illustration-dup.png" width="900">
+<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/path-patching-decomp-four.png" width="850">
+
+### Why MLPs?
+
+You might be wondering why we're including MLPs as part of our direct path. The short answer is that this is what the IOI paper does, and we're trying to replicate it! The slightly longer answer is that both this method and a method which doesn't count MLPs as the direct path are justifiable.
+
+To take one example, suppose the output of head `0.0` is being used directly by head `2.0`, but one of the MLPs is acting as a mediator. To oversimplify, we might imagine that `0.0` writes the vector $v$ into the residual stream, some neuron detects $v$ and writes $w$ to the residual stream, and `2.0` detects $w$. If we didn't count MLPs as a direct path then we wouldn't catch this causal relationship. The drawback is that things get a bit messier, because now we're essentially passing a "fake input" into our MLPs, and it's dangerous to assume that any operation as clean as the one previously described (with vectors $v$, $w$) would still happen under these new circumstances.
+
+Also, having MLPs as part of the direct path doesn't help us understand what role the MLPs play in the circuit, all it does is tell us that some of them are important! Luckily, in the IOI circuit, MLPs aren't important (except for MLP0), and so doing both these forms of path patching get pretty similar results. As an optional exercise, you can reproduce the results from the following few sections using this different form of path patching. It's actually algorithmically easier to implement, because we only need one forward pass rather than two. Can you see why?
+
+<details>
+<summary>Answer</summary>
+
+Because the MLPs were part of the direct paths between sender and receiver in the previous version of the algorithm, we had to do a forward pass to find the value we'd be patching into the receivers. But if MLPs aren't part of the direct path, then we can directly compute what to patch into the receiver nodes:
+
+```
+orig_receiver_input <- orig_receiver_input + (new_sender_output - old_sender_output)
+```
+
+Diagram with direct paths not including MLPs:
+
+<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/path-patching-decomp-one.png" width="1200">
+
+</details>
 
 
 ## Path Patching: Name Mover Heads
@@ -2296,9 +2332,9 @@ Here is an illustration for a 2-layer transformer:
 
 ### Exercise - implement path patching to the final residual stream value
 
-```c
-Difficulty: 🟠🟠🟠🟠🟠
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴🔴
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 30-45 minutes on this exercise.
 
@@ -2562,9 +2598,9 @@ The paper's results from path patching are shown in figure 5(b), on page 7.
 
 ### Exercise - implement path patching from head to head
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -2814,9 +2850,9 @@ We'll start this section by replicating the paper's analysis of the **name mover
 
 ### Exercise - replicate writing direction results
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -2951,9 +2987,9 @@ The same is true for the negative name mover head `11.10`, only it works in the 
 
 ### Exercise - replicate copying score results
 
-```c
-Difficulty: 🟠🟠🟠🟠🟠
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴🔴
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 30-40 minutes on this exercise.
 
@@ -3113,9 +3149,9 @@ Note, it's a leaky abstraction to say things like "head X is an induction head",
 
 ### Exercise - perform head validation
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 20-30 minutes on this exercise.
 
@@ -3322,9 +3358,9 @@ In other words, when they performed ablation by patching in the output of a head
 
 ### Exercise - constructing the minimal circuit
 
-```c
-Difficulty: 🟠🟠🟠🟠🟠
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴🔴
+Importance: 🔵🔵⚪⚪⚪
 
 This exercise is expected to take a long time; at least an hour. It is probably the most challenging exercise in this notebook.
 ```
@@ -3626,9 +3662,9 @@ def add_mean_ablation_hook(
 
 ### Exercise - calculate minimality scores
 
-```c
-Difficulty: 🟠🟠🟠🟠🟠
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴🔴
+Importance: 🔵🔵⚪⚪⚪
 
 This exercise is expected to take a long time; at least an hour. It is probably the second most challenging exercise in this notebook.
 ```
@@ -3949,9 +3985,9 @@ Note that this is a superficial study of whether something is an induction head 
 
 ### Exercise - validate prev token heads via patching
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 This just involves performing a specific kind of patching, with functions you've already written.
 ```
@@ -4270,9 +4306,9 @@ Let's dig a little deeper. Rather than just looking at the S-inhibition heads co
 
 ### Exercise - decompose S-Inhibition heads
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -4404,7 +4440,13 @@ Here is a collection of links for further reading, which haven't already been me
 
 
 func_page_list = [
-    (section_0, "🏠 Home"),     (section_1, "1️⃣ Model & Task Setup"),     (section_2, "2️⃣ Logit Attribution"),     (section_3, "3️⃣ Activation Patching"),     (section_4, "4️⃣ Path Patching"),     (section_5, "5️⃣ Paper Replication"),     (section_6, "6️⃣ Bonus / exploring anomalies"), 
+    (section_0, "🏠 Home"),
+    (section_1, "1️⃣ Model & Task Setup"),
+    (section_2, "2️⃣ Logit Attribution"),
+    (section_3, "3️⃣ Activation Patching"),
+    (section_4, "4️⃣ Path Patching"),
+    (section_5, "5️⃣ Paper Replication"),
+    (section_6, "6️⃣ Bonus / exploring anomalies"), 
 ]
 
 func_list = [func for func, page in func_page_list]
@@ -4421,3 +4463,8 @@ def page():
     func()
 
 page()
+
+
+streamlit_analytics.stop_tracking(
+    unsafe_password=st.secrets["analytics_password"],
+)

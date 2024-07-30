@@ -1,8 +1,13 @@
-
 import os, sys
 from pathlib import Path
 chapter = r"chapter1_transformers"
-instructions_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve()
+for instructions_dir in [
+    Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve(),
+    Path("/app/arena_2.0/chapter1_transformers/instructions").resolve(),
+    Path("/mount/src/arena_2.0/chapter1_transformers/instructions").resolve(),
+]:
+    if instructions_dir.exists():
+        break
 if str(instructions_dir) not in sys.path: sys.path.append(str(instructions_dir))
 os.chdir(instructions_dir)
 
@@ -13,6 +18,11 @@ st_dependencies.styling()
 
 import platform
 is_local = (platform.processor() != "")
+
+import streamlit_analytics
+streamlit_analytics.start_tracking()
+
+st.error("This is no longer the most updated version of these exercises: see [here](https://arena3-chapter1-transformer-interp.streamlit.app/) for the newest page.", icon="🚨")
 
 def section_0():
 
@@ -29,18 +39,18 @@ def section_0():
 </ul></li>""", unsafe_allow_html=True)
 
     st.markdown(r"""
+# [1.4] Balanced Bracket Classifier
 
-<img src="https://raw.githubusercontent.com/callummcdougall/TransformerLens-intro/main/images/page_images/gears2.png" width="350">
 
-
-Colab: [**exercises**](https://colab.research.google.com/drive/1BYarO508z7stRFXZ3T92rI6OtMqP3w7E) | [**solutions**](https://colab.research.google.com/drive/1yILyi5dD3wc4o3vHc1MfbpAlWljyXU-U)
+### Colab: [**exercises**](https://colab.research.google.com/drive/1BYarO508z7stRFXZ3T92rI6OtMqP3w7E) | [**solutions**](https://colab.research.google.com/drive/1yILyi5dD3wc4o3vHc1MfbpAlWljyXU-U)
 
 Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
 
 You can toggle dark mode from the buttons on the top-right of this page.
 
+Links to other chapters: [**(0) Fundamentals**](https://arena-ch0-fundamentals.streamlit.app/), [**(2) RL**](https://arena-ch2-rl.streamlit.app/).
 
-# [1.4] Balanced Bracket Classifier
+<img src="https://raw.githubusercontent.com/callummcdougall/TransformerLens-intro/main/images/page_images/gears2.png" width="350">
 
 
 ## Introduction
@@ -167,9 +177,9 @@ from transformer_lens.hook_points import HookPoint
 from transformer_lens.components import LayerNorm
 
 # Make sure exercises are in the path
-chapter = r"chapter1_transformers"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = exercises_dir / "part4_interp_on_algorithmic_model"
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part4_interp_on_algorithmic_model', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
 
 import plotly_utils
@@ -530,9 +540,9 @@ print(f"\nModel got {n_correct} out of {len(data)} training examples correct!")
 
 ### Exercise - handwritten solution (for loop)
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than ~10 minutes on this exercise.
 
@@ -583,9 +593,9 @@ def is_balanced_forloop(parens: str) -> bool:
 
 ### Exercise -  handwritten solution (vectorized)
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than ~10 minutes on this exercise.
 ```
@@ -781,9 +791,9 @@ The diagram below shows how we can step back through the model to find our **unb
 
 ### Exercise - get the `post_final_ln_dir`
 
-```c
-Difficulty: 🟠⚪⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴⚪⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than ~5 minutes on this exercise.
 ```
@@ -847,9 +857,9 @@ Now, we can ask 'What leads to the _input_ to the LayerNorm having a high dot-pr
 
 ### Exercise - get the `pre_final_ln_dir`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 25-35 minutes on the following set of exercises.
 
@@ -882,7 +892,7 @@ def get_activations(
     Uses hooks to return activations from the model.
 
     If names is a string, returns the activations for that hook name.
-    If names is a list of strings, returns a dictionary mapping hook names to tensors of activations.
+    If names is a list of strings, returns the cache containing only those activations.
     '''
     names_list = [names] if isinstance(names, str) else names
     _, cache = model.run_with_cache(
@@ -1055,9 +1065,9 @@ In order to answer this question, we need the following tools:
 
 ### Exercise - breaking down the residual stream by component
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 15-20 minutes on this exercise.
 
@@ -1169,9 +1179,9 @@ This would be **strong evidence that this component is important for the model's
 
 ### Exercise - compute output in unbalanced direction for each component
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 10-15 minutes on this exercise.
 
@@ -1252,9 +1262,9 @@ We'll also ignore sentences that start with a close paren, as the behaviour is s
 
 ### Exercise - classify bracket strings by failure type
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 15-20 minutes on this exercise.
 
@@ -1430,9 +1440,9 @@ Which tokens is 2.0 paying attention to when the query is an open paren at token
 
 ### Exercise - get attention probabilities
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 5-10 minutes on this exercise.
 
@@ -1494,9 +1504,9 @@ Here is an annotated diagram to help better explain exactly what we're doing.
 
 #### Exercise - calculate the pre-head 2.0 unbalanced direction
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 15-20 minutes on these exercises.
 
@@ -1558,9 +1568,9 @@ def get_pre_20_dir(model, data) -> Float[Tensor, "d_model"]:
 
 ### Exercise - compute component magnitudes
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 10-15 minutes on these exercises.
 
@@ -1646,14 +1656,14 @@ $$
 
 Diagram illustrating this (without biases):
 
-<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/mlp-neurons.png" width="850">
+<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/mlp-neurons-2.png" width="850">
 
 
 ### Exercise - get output by neuron
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 25-35 minutes on these exercises.
 
@@ -1673,11 +1683,12 @@ def get_out_by_neuron(
     seq: Optional[int] = None
 ) -> Float[Tensor, "batch *seq neuron d_model"]:
     '''
-    If seq is not None, then out[b, s, i, :] = f(x[b, s].T @ W_in[:, i]) @ W_out[i, :],
-    i.e. the vector which is written to the residual stream by the ith neuron (where x
-    is the input to the residual stream (i.e. shape (batch, seq, d_model)).
+    If seq is None, then out[batch, seq, i, :] = f(x[batch, seq].T @ W_in[:, i] + b_in[i]) @ W_out[i, :],
+    i.e. the vector which is written to the residual stream by the ith neuron (where x is the input to the
+    residual stream (i.e. shape (batch, seq, d_model)).
 
-    If seq is None, then out[b, i, :] = vector f(x[b].T @ W_in[:, i]) @ W_out[i, :]
+    If seq is not None, then out[batch, i, :] = f(x[batch, seq].T @ W_in[:, i]) @ W_out[i, :], i.e. we just
+    look at the sequence position given by argument seq.
 
     (Note, using * in jaxtyping indicates an optional dimension)
     '''
@@ -1718,11 +1729,12 @@ def get_out_by_neuron(
     seq: Optional[int] = None
 ) -> Float[Tensor, "batch *seq neuron d_model"]:
     '''
-    If seq is not None, then out[b, s, i, :] = f(x[b, s].T @ W_in[:, i]) @ W_out[i, :],
-    i.e. the vector which is written to the residual stream by the ith neuron (where x
-    is the input to the residual stream (i.e. shape (batch, seq, d_model)).
+    If seq is None, then out[batch, seq, i, :] = f(x[batch, seq].T @ W_in[:, i] + b_in[i]) @ W_out[i, :],
+    i.e. the vector which is written to the residual stream by the ith neuron (where x is the input to the
+    residual stream (i.e. shape (batch, seq, d_model)).
 
-    If seq is None, then out[b, i, :] = vector f(x[b].T @ W_in[:, i]) @ W_out[i, :]
+    If seq is not None, then out[batch, i, :] = f(x[batch, seq].T @ W_in[:, i]) @ W_out[i, :], i.e. we just
+    look at the sequence position given by argument seq.
 
     (Note, using * in jaxtyping indicates an optional dimension)
     '''
@@ -1770,9 +1782,9 @@ def get_out_by_neuron_in_20_dir(model: HookedTransformer, data: BracketsDataset,
 
 ### Exercise - implement the same function, using less memory
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 10-15 minutes on this exercise.
 
@@ -1807,7 +1819,6 @@ First, project each of the output directions onto the pre-2.0 unbalanced directi
 
 <details>
 <summary>Solution</summary>
-
 
 ```python
 def get_out_by_neuron_in_20_dir_less_memory(model: HookedTransformer, data: BracketsDataset, layer: int) -> Float[Tensor, "batch neurons"]:
@@ -1891,9 +1902,9 @@ We want to play around with the attention patterns in our heads. For instance, w
 
 ### Exercise - extracting queries and keys using hooks
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than ~10 minutes on this exercise.
 
@@ -1907,9 +1918,10 @@ def get_q_and_k_for_given_input(
     tokenizer: SimpleTokenizer,
     parens: str, 
     layer: int, 
-) -> Tuple[Float[Tensor, "seq_d_model"], Float[Tensor,  "seq_d_model"]]:
+) -> Tuple[Float[Tensor, "seq n_head d_model"], Float[Tensor,  "seq n_head d_model"]]:
     '''
-    Returns the queries and keys (both of shape [seq, d_model]) for the given parns input, in the attention head `layer.head`.
+    Returns the queries and keys (both of shape [seq, d_head, d_model]) for the given parens string,
+    for all attention heads in the given layer.
     '''
     pass
 
@@ -1927,9 +1939,10 @@ def get_q_and_k_for_given_input(
     tokenizer: SimpleTokenizer,
     parens: str, 
     layer: int, 
-) -> Tuple[Float[Tensor, "seq_d_model"], Float[Tensor,  "seq_d_model"]]:
+) -> Tuple[Float[Tensor, "seq n_head d_model"], Float[Tensor,  "seq n_head d_model"]]:
     '''
-    Returns the queries and keys (both of shape [seq, d_model]) for the given parns input, in the attention head `layer.head`.
+    Returns the queries and keys (both of shape [seq, d_head, d_model]) for the given parens string,
+    for all attention heads in the given layer.
     '''
     # SOLUTION
     q_name = utils.get_act_name("q", layer)
@@ -1995,7 +2008,8 @@ def hook_fn_display_attn_patterns(
         tokens=labels, 
         attention=avg_head_attn_pattern,
         attention_head_names=["0.0", "0.1"],
-        max_value=avg_head_attn_pattern.max()
+        max_value=avg_head_attn_pattern.max(),
+        mask_upper_tri=False, # use for bidirectional models
     ))
 
 
@@ -2010,31 +2024,6 @@ model.run_with_hooks(
     ]
 )
 ```
-
-<details>
-<summary>Help - my <code>attention_heads</code> plots are behaving weirdly (e.g. they continually shrink after I plot them).</summary>
-
-This seems to be a bug in `circuitsvis` - on VSCode, the attention head plots continually shrink in size.
-
-Until this is fixed, one way to get around it is to open the plots in your browser. You can do this inline with the `webbrowser` library:
-
-```python
-attn_heads = cv.attention.attention_heads(
-    tokens=labels, 
-    attention=avg_head_attn_pattern,
-    attention_head_names=["0.0"],
-)
-
-path = "attn_heads.html"
-
-with open(path, "w") as f:
-    f.write(str(attn_heads))
-
-webbrowser.open(path)
-```
-
-To check exactly where this is getting saved, you can print your current working directory with `os.getcwd()`.
-</details>
 
 <details>
 <summary>Question - what are the noteworthy features of head <code>0.0</code> in this plot?</summary>
@@ -2159,9 +2148,9 @@ Finally, we have an ability to formulate a test for our hypothesis in terms of t
 
 ### Exercise - validate the hypothesis
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 10-15 minutes on this exercise.
 
@@ -2207,9 +2196,9 @@ Note - we don't actually require $\color{orange}{\vec v_L}$ and $\color{orange}{
 
 ### Exercise - cosine similarity of input directions (optional)
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You shouldn't spend more than 10-15 minutes on this exercise.
 ```
@@ -2431,18 +2420,6 @@ probs = model(toks)[:, 0].softmax(-1)[:, 1]
 print("\n".join([f"{ex:{m}} -> {p:.4%} balanced confidence" for (ex, p) in zip(examples, probs)]))
 ```
 
-<details>
-<summary>Solution</summary>
-
-
-```python
-    return "".join(["(" for _ in range(length)] + [")" for _ in range(length)])
-example = tallest_balanced_bracket(15) + ")(" + tallest_balanced_bracket(4)
-examples.append(example)
-
-```
-</details>
-
 
 ## Dealing with early closing parens
 
@@ -2484,7 +2461,11 @@ You can also get more ideas from Neel Nanda's [200 Concrete Open Problems in MI:
 
 
 func_page_list = [
-    (section_0, "🏠 Home"),     (section_1, "1️⃣ Bracket classifier"),     (section_2, "2️⃣ Moving backwards"),     (section_3, "3️⃣ Understanding the total elevation circuit"),     (section_4, "4️⃣ Bonus exercises"), 
+    (section_0, "🏠 Home"),
+    (section_1, "1️⃣ Bracket classifier"),
+    (section_2, "2️⃣ Moving backwards"),
+    (section_3, "3️⃣ Understanding the total elevation circuit"),
+    (section_4, "4️⃣ Bonus exercises"), 
 ]
 
 func_list = [func for func, page in func_page_list]
@@ -2501,3 +2482,8 @@ def page():
     func()
 
 page()
+
+
+streamlit_analytics.stop_tracking(
+    unsafe_password=st.secrets["analytics_password"],
+)

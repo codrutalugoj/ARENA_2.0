@@ -14,6 +14,11 @@ st_dependencies.styling()
 import platform
 is_local = (platform.processor() != "")
 
+import streamlit_analytics
+streamlit_analytics.start_tracking()
+
+st.error("This is no longer the most updated version of these exercises: see [here](https://arena3-chapter0-fundamentals.streamlit.app/) for the newest page.", icon="🚨")
+
 def section_0():
 
     st.sidebar.markdown(r"""
@@ -24,29 +29,30 @@ def section_0():
     <li class='margtop'><a class='contents-el' href='#introduction'>Introduction</a></li>
     <li class='margtop'><a class='contents-el' href='#content-learning-objectives'>Content & Learning Objectives</a></li>
     <li><ul class="contents">
-        <li><a class='contents-el' href='#110125-einops-and-einsum'>1️⃣ Einops and Einsum</a></li>
-        <li><a class='contents-el' href='#1010125-array-strides'>2️⃣ Array strides</a></li>
-        <li><a class='contents-el' href='#12510125-convolutions'>3️⃣ Convolutions</a></li>
-        <li><a class='contents-el' href='#1010125-making-your-own-modules'>4️⃣ Making your own modules</a></li>
+        <li><a class='contents-el' href='#1-einops-and-einsum'>1️⃣ Einops and Einsum</a></li>
+        <li><a class='contents-el' href='#2-array-strides'>2️⃣ Array strides</a></li>
+        <li><a class='contents-el' href='#3-convolutions'>3️⃣ Convolutions</a></li>
+        <li><a class='contents-el' href='#4-making-your-own-modules'>4️⃣ Making your own modules</a></li>
     </ul></li>
     <li class='margtop'><a class='contents-el' href='#setup'>Setup</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
-
-<img src="https://raw.githubusercontent.com/callummcdougall/Fundamentals/main/images/cnn.png" width="350">
-
-
-Colab: [**exercises**](https://colab.research.google.com/drive/1HFsebBH7SJ7wqVCmTAt097FkDbCC6AQf) | [**solutions**](https://colab.research.google.com/drive/1ttKR6WOCKDBXmbwvKd-gpI2AUXp1OzBa)
-
-Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
-
+    st.markdown(
+r"""
 
 # [0.2] - `as_strided`, Convolutions and CNNs
 
+### Colab: [**exercises**](https://colab.research.google.com/drive/1HFsebBH7SJ7wqVCmTAt097FkDbCC6AQf) | [**solutions**](https://colab.research.google.com/drive/1ttKR6WOCKDBXmbwvKd-gpI2AUXp1OzBa)
+
+Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
+
+You can toggle dark mode from the buttons on the top-right of this page.
+
+Links to other chapters: [**(1) Transformers & Mech Interp**](https://arena-ch1-transformers.streamlit.app/), [**(2) RL**](https://arena-ch2-rl.streamlit.app/).
+
+<img src="https://raw.githubusercontent.com/callummcdougall/Fundamentals/main/images/cnn.png" width="350">
 
 ## Introduction
-
 
 This section is designed to get you familiar with basic neural networks: how they are structured, the basic operations like linear layers and convolutions which go into making them, and why they work as well as they do. You'll be using libraries like `einops`, and functions like `torch.as_strided` to get a very low-level picture of how these operations work, which will help build up your overall understanding.
 
@@ -114,9 +120,9 @@ from torch.utils.data import DataLoader, Subset
 from tqdm.notebook import tqdm
 
 # Make sure exercises are in the path
-chapter = r"chapter0_fundamentals"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = exercises_dir / "part2_cnns"
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part2_cnns', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
 
 from plotly_utils import imshow, line, bar
@@ -149,7 +155,8 @@ def section_1():
         <li><a class='contents-el' href='#einsum-exercises'>Einsum exercises</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 # 1️⃣ Einops and Einsum
 
@@ -193,7 +200,8 @@ if MAIN:
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig1.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 A series of images follow below, which have been created using `einops` functions performed on `arr`. You should work through these and try to produce each of the images yourself. This page also includes solutions, but you should only look at them after you've tried for at least five minutes.
@@ -203,9 +211,9 @@ A series of images follow below, which have been created using `einops` function
 
 ### Einops exercises
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~45 minutes on these exercises collectively.
 
@@ -219,7 +227,8 @@ If you think you get the general idea, then you can skip to the next section.
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig2.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -248,7 +257,8 @@ arr1 = einops.rearrange(arr, "b c h w -> c h (b w)")
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig3.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -277,7 +287,8 @@ arr2 = einops.repeat(arr[0], "c h w -> c (2 h) w")
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig4.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -306,7 +317,8 @@ arr3 = einops.repeat(arr[0:2], "b c h w -> c (b h) (2 w)")
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig5.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -335,7 +347,8 @@ arr4 = einops.repeat(arr[0], "c h w -> c (h 2) w")
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig6.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -364,7 +377,8 @@ arr5 = einops.rearrange(arr[0], "c h w -> h (c w)")
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig7.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -393,7 +407,8 @@ arr6 = einops.rearrange(arr, "(b1 b2) c h w -> c (b1 h) (b2 w)", b1=2)
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig8.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -422,7 +437,8 @@ arr7 = einops.reduce(arr.astype(float), "b c h w -> h (b w)", "max").astype(int)
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig10.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -451,7 +467,8 @@ arr8 = einops.reduce(arr.astype(float), "b c h w -> h w", "min").astype(int)
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig12.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -480,7 +497,8 @@ arr9 = einops.rearrange(arr[1], "c h w -> c w h")
 """, unsafe_allow_html=True)
     fig = st_dependencies.read_from_html("media/fig14.html")
     st.plotly_chart(fig)
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 
 ```python
@@ -525,9 +543,9 @@ Although there are many different kinds of operations you can perform, they are 
 
 ### Einsum exercises
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 15-20 minutes on these exercises collectively.
 
@@ -653,7 +671,8 @@ def section_2():
         <li><a class='contents-el' href='#exercise-matrix-matrix-multiplication'><b>Exercise</b> - matrix-matrix multiplication</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 # 2️⃣ Array strides
 
@@ -699,9 +718,9 @@ We can call the `stride` method to get the strides of this particular array. Run
 
 ### Exercise - fill in the correct size and stride
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to ~30 minutes on these exercises collectively.
 
@@ -878,9 +897,9 @@ Now that you're comfortable with the basics, we'll dive a little deeper with `as
 
 ### Exercise - trace
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -932,14 +951,16 @@ def as_strided_trace(mat: Float[Tensor, "i j"]) -> Float[Tensor, ""]:
 
 ### Exercise - matrix-vector multiplication
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 
 The hints should be especially useful here if you're stuck. There are two hints available to you.
 ```
+                
+You should implement this using only `as_strided` and `sum` methods, and elementwise multiplication `*` - in other words, no matrix multiplication functions!
 
 
 ```python
@@ -1032,14 +1053,16 @@ def as_strided_mv(mat: Float[Tensor, "i j"], vec: Float[Tensor, "j"]) -> Float[T
 
 ### Exercise - matrix-matrix multiplication
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 
 The hints should be especially useful here if you're stuck. There are two hints available to you.
 ```
+                
+Like the previous function, this should only involve `as_strided`, `sum`, and pointwise multiplication.
 
 
 ```python
@@ -1142,6 +1165,7 @@ def section_3():
     <li class='margtop'><a class='contents-el' href='#reading'>Reading</a></li>
     <li class='margtop'><a class='contents-el' href='#conv1d-minimal'>conv1d minimal</a></li>
     <li><ul class="contents">
+        <li><a class='contents-el' href='#a-note-on-out-channels'>A note on out_channels</a></li>
         <li><a class='contents-el' href='#exercise-implement-minimal-1d-convolutions'><b>Exercise</b> - implement minimal 1D convolutions</a></li>
     </ul></li>
     <li class='margtop'><a class='contents-el' href='#conv2d-minimal'>conv2d minimal</a></li>
@@ -1162,7 +1186,8 @@ def section_3():
         <li><a class='contents-el' href='#exercise-implement-10d-max-pooling'><b>Exercise</b> - implement 2D max pooling</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 # 3️⃣ Convolutions
 
@@ -1226,12 +1251,17 @@ A typical convolution operation is illustrated in the sketch below. Some notes o
 
 <img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/ch0-conv1d-general.png" width=1050>
 
+### A note on `out_channels`
+
+The out_channels in a conv2d layer denotes the number of filters the layer uses. Each filter detects specific features in the input, producing an output with as many channels as filters.
+
+This number isn't tied to the input image's channels but is a design choice in the neural network architecture. Commonly, powers of 2 are chosen for computational efficiency, and deeper layers might have more channels to capture complex features. Additionally, this parameter is sometimes chosen based on the heuristic of wanting to balance the parameter count / compute for each layer - which is why you often see `out_channels` growing as the size of each feature map gets smaller.
 
 ### Exercise - implement minimal 1D convolutions
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 
@@ -1314,9 +1344,9 @@ def conv1d_minimal_simple(x: Float[Tensor, "w"], weights: Float[Tensor, "kw"]) -
 Once you've implemented this function, you should now adapt it to make a "full version", which includes batch, in_channel and out_channel dimensions. If you're stuck, the dropdowns provide hints for how each of these dimensions should be handled.
 
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -1406,9 +1436,9 @@ For this reason, 1D convolutions tend to be used for signals (e.g. audio), 2D co
 
 ### Exercise - implement 2D minimal convolutions
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -1485,9 +1515,9 @@ def conv2d_minimal(x: Float[Tensor, "b ic h w"], weights: Float[Tensor, "oc ic k
 
 ### Exercise - implement padding
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 15-20 minutes on this exercise, and the next.
 ```
@@ -1606,9 +1636,9 @@ Docs for pytorch's `conv1d` can be found [here](https://pytorch.org/docs/stable/
 
 ### Exercise - implement 1D convolutions
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 ```
@@ -1698,9 +1728,9 @@ def conv1d(
 
 ### Exercise - implement 2D convolutions
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 ```
@@ -1815,9 +1845,9 @@ The way multiple channels work is also different. A convolution has some number 
 
 ### Exercise - implement 2D max pooling
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -1954,7 +1984,8 @@ def section_4():
     <li class='margtop'><a class='contents-el' href='#training-loop-taster-for-tomorrow'>Training loop (taster for tomorrow)</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
+    st.markdown(
+r"""
 
 # 4️⃣ Making your own modules
 
@@ -2032,9 +2063,9 @@ The first module you should implement is `MaxPool2d`. This will relatively simpl
 
 ### Exercise - implement `MaxPool2d`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~10 minutes on this exercise.
 ```
@@ -2127,9 +2158,9 @@ Flatten is most often used to stack over all non-batched dimensions, which inclu
 
 ### Exercise - implement `ReLU` and `Flatten`
 
-```c
-Difficulty: 🟠⚪⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴⚪⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~10 minutes on this exercise.
 ```
@@ -2311,9 +2342,9 @@ However, you don't need to worry about any of this here, just implement Kaiming 
 
 ### Exercise - implement `Linear`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to ~10 minutes on this exercise.
 ```
@@ -2684,7 +2715,11 @@ In subsequent exercises, we'll proceed to a more advanced architecture: residual
 
 
 func_page_list = [
-    (section_0, "🏠 Home"),     (section_1, "1️⃣ Einops and Einsum"),     (section_2, "2️⃣ Array strides"),     (section_3, "3️⃣ Convolutions"),     (section_4, "4️⃣ Making your own modules"), 
+    (section_0, "🏠 Home"),
+    (section_1, "1️⃣ Einops and Einsum"),
+    (section_2, "2️⃣ Array strides"),
+    (section_3, "3️⃣ Convolutions"),
+    (section_4, "4️⃣ Making your own modules"), 
 ]
 
 func_list = [func for func, page in func_page_list]
@@ -2701,3 +2736,8 @@ def page():
     func()
 
 page()
+
+
+streamlit_analytics.stop_tracking(
+    unsafe_password=st.secrets["analytics_password"],
+)

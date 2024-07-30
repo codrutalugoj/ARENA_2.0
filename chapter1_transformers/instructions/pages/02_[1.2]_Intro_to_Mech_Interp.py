@@ -1,8 +1,16 @@
+import platform
+is_local = (platform.processor() != "")
 
 import os, sys
 from pathlib import Path
 chapter = r"chapter1_transformers"
-instructions_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve()
+for instructions_dir in [
+    Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve(),
+    Path("/app/arena_2.0/chapter1_transformers/instructions").resolve(),
+    Path("/mount/src/arena_2.0/chapter1_transformers/instructions").resolve(),
+]:
+    if instructions_dir.exists():
+        break
 if str(instructions_dir) not in sys.path: sys.path.append(str(instructions_dir))
 os.chdir(instructions_dir)
 
@@ -13,6 +21,11 @@ st_dependencies.styling()
 
 import platform
 is_local = (platform.processor() != "")
+
+import streamlit_analytics
+streamlit_analytics.start_tracking()
+
+st.error("This is no longer the most updated version of these exercises: see [here](https://arena3-chapter1-transformer-interp.streamlit.app/) for the newest page.", icon="🚨")
 
 def section_0():
 
@@ -27,24 +40,21 @@ def section_0():
 </ul></li>""", unsafe_allow_html=True)
 
     st.markdown(r"""
+# [1.2] Intro to Mechanistic Interpretability: TransformerLens & induction circuits
 
-<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/lens2.png" width="350">
-
-
-Colab: [**exercises**](https://colab.research.google.com/drive/1w9zCWpE7xd1sDuMT_rsjARfFozeWiKF4) | [**solutions**](https://colab.research.google.com/drive/10tzGmOCQb3LoDB69vPFw71DV2d395hJl)
+### Colab: [**exercises**](https://colab.research.google.com/drive/1w9zCWpE7xd1sDuMT_rsjARfFozeWiKF4) | [**solutions**](https://colab.research.google.com/drive/10tzGmOCQb3LoDB69vPFw71DV2d395hJl)
 
 Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
 
 You can toggle dark mode from the buttons on the top-right of this page.
 
+Links to other chapters: [**(0) Fundamentals**](https://arena-ch0-fundamentals.streamlit.app/), [**(2) RL**](https://arena-ch2-rl.streamlit.app/).
 
-# [1.2] TransformerLens & induction circuits
-
+<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/lens2.png" width="350">
 
 ## Introduction
 
-
-These pages are designed to get you introduced to Neel's **TransformerLens** library.
+These pages are designed to get you introduced to the core concepts of mechanistic interpretability, via Neel Nanda's **TransformerLens** library.
 
 Most of the sections are constructed in the following way:
 
@@ -55,12 +65,9 @@ The running theme of the exercises is **induction circuits**. Induction circuits
 
 Each exercise will have a difficulty and importance rating out of 5, as well as an estimated maximum time you should spend on these exercises and sometimes a short annotation. You should interpret the ratings & time estimates relatively (e.g. if you find yourself spending about 50% longer on the exercises than the time estimates, adjust accordingly). Please do skip exercises / look at solutions if you don't feel like they're important enough to be worth doing, and you'd rather get to the good stuff!
 
-
 <img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/kcomp_diagram.png" width="1000">
 
-
 ## Content & Learning Objectives
-
 
 #### 1️⃣ TransformerLens: Introduction
 
@@ -132,9 +139,9 @@ from transformer_lens import utils, HookedTransformer, HookedTransformerConfig, 
 import circuitsvis as cv
 
 # Make sure exercises are in the path
-chapter = r"chapter1_transformers"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = (exercises_dir / "part2_intro_to_mech_interp").resolve()
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part2_intro_to_mech_interp', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
 
 from plotly_utils import imshow, hist, plot_comp_scores, plot_logit_attribution, plot_loss_difference
@@ -200,7 +207,7 @@ def section_1():
 
 ## Introduction
 
-*Note - most of this is written from the POV of Neel Nanda.*
+*Note - this intro is written from the POV of Neel Nanda.*
 
 This is a demo notebook for [TransformerLens](https://github.com/neelnanda-io/TransformerLens), **a library I ([Neel Nanda](https://www.neelnanda.io/)) wrote for doing [mechanistic interpretability](https://distill.pub/2020/circuits/zoom-in/) of GPT-2 Style language models.** The goal of mechanistic interpretability is to take a trained model and reverse engineer the algorithms the model learned during training from its weights. It is a fact about the world today that we have computer programs that can essentially speak English at a human level (GPT-3, PaLM, etc), yet we have no idea how they work nor how to write one ourselves. This offends me greatly, and I would like to solve this! Mechanistic interpretability is a very young and small field, and there are a *lot* of open problems - if you would like to help, please try working on one! **Check out my [list of concrete open problems](https://docs.google.com/document/d/1WONBzNqfKIxERejrrPlQMyKqg7jSFW92x5UMXNrMdPo/edit#) to figure out where to start.**
 
@@ -226,9 +233,9 @@ Even if you don't define your model in this way, you can still access the config
 
 ### Exercise - inspect your model
 
-```c
-Difficulty: 🟠⚪⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴⚪⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 ```
 
 Use `gpt2_small.cfg` to find the following, for your GPT-2 Small model:
@@ -316,11 +323,13 @@ It's important to distinguish between parameters and activations in the model.
 
 The link below shows a diagram of a single layer (called a `TransformerBlock`) for an attention-only model with no biases. Each box corresponds to an **activation** (and also tells you the name of the corresponding hook point, which we will eventually use to access those activations). The red text below each box tells you the shape of the activation (ignoring the batch dimension). Each arrow corresponds to an operation on an activation; where there are **parameters** involved these are labelled on the arrows.
 
-[Link to diagram](https://mermaid.ink/svg/pako:eNrNVsFu2zAM_RVBh7UDYnQLdnKyHIasOfQwFCu2Q10EikXHhmVJkWQ3Sd1_H-U4dR2kQLFDEx0kUibtR_pR1BONFQca0qVhOiV300gSHLZc7DYiOraaSWLdRsD3i0RJF9hsC-Hwm15fTO4MkzZRpgDzQ6g4J5fMOUmUFJvP4yvvOYno7pV-xIJZO4WEQKHdhjxm3KXhF70epJAtU-fF0RFrDxEnoUxogKNFZ2PAZnyuDdxH9EUe86zaI14ow8EETulwqNfEKpFxshAszkcFM8tMNo-aYMZX6DcZN19rvbuPdpF_HXrjSwurAeHzAq0Fxuq9MNaHIAim9-QhDMMmxiCY1IzzusWmrOuwd9J7090k9xMUVo_6y7G9dyz_Nx_5sX5UfXXVV_O-6iOZ21hhXvoPrvuqRkMwsr8566vbvoqvLMWrNIPkR_jif8zf-Z-6QuJUH0cYmQLjnjd-7dNmdkCbx6YmgBNWLYlKSMVECaSC2Clj6y3i3p4eN0GkBBP5q96lfVeGKJwA2mEpemy1LQuiKjDEW9m64Z0qPc69eOrT4k1y3tYrhLk6C3JeH5CTK0e0UbyMHWFCyWXrNSA2ZgIIk5wUzOb1q0Lf53ynfUhYbUQY3W0z3_SiQnaoxBVsXbfHDCJspTNAF8zeZMZNnSPU_DyYcayhde2u68uonLLUDmFiW6ADiheXgmUcL0BPfjuiLoUCIhqiyCFhvpNgn3tG01Jz5uAnz_D8pWHChIUBZaVTvzcypqEzJeyNphnDfl60Vs__ANh9IJM)
+[Link to diagram](https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/small-merm.svg)
 
 The next link is to a diagram of a `TransformerBlock` with full features (including biases, layernorms, and MLPs). Don't worry if not all of this makes sense at first - we'll return to some of the details later. As we work with these transformers, we'll get more comfortable with their architecture.
 
-[Link to diagram](https://mermaid.ink/svg/pako:eNrdV1FP2zAQ_itWpI1tasSIeApdJaYWJqGNIRA8UBS5sdNadeLUdkJbwn_fOUkJ6ZoCm9R2y4N955yT786fz-cHyxeEWq41lDgeoatuP0LwqGRQDPSttopxhJSecfplLxCRthWbU9c5jKd7nSuJIxUIGVL5lQt_3N431p2-VXzGPD7HSnVpgGgY6xm6Z0SP3M_xtDWibDjSRjxaYW1gQcOFdCUlYFHZSKoY8WJJb_vWk9wmLF2gHAhJqLS1iF0nniIlOCNowLE_PgqxHLIof5U70N6HeZ12_rdydvXTytsDxxh_UHTSQsQLwZp_bO-bWeDrnW3b3Vt057pu7qNtdzJMSFZgCxmB973G97FQunIElG16UgW5kl7LBR4doPc0VPFR2T1v0ZruJev17QrK5ah9zGl9KAKeYg6ASTVOI7KCWAiWCGXguJbY1yikOIJosZRBbAczCADJ8u_DuuX95pbs4NliFShvPA7gBtBmlYMArFL-VUJhrSP0Flqgt3Z_1jYwLq2rk7o6rqvGN0_5AihXf3FSV2MwpDKqD57W1XldhU8mXDdQvGKFyUI33rWhznWWAmHSzfFkRDHxGJkaxhi5nktPl3LlfX5QUIJwOkQiQCnmCUUp9bWQKpsD9PlOQF_sx_OsWIIiq4OwHXTLW9HAg5wWIpFSmVuqFoJzCA0YVsCC8ywnpUgM8IW47WO1mbkXhrkX2QTATnaFuSdLzCVCo1gKksAhgrmIhuWsVnE8IRwRFGI1zp6lg0XwC20jnlVOgY8XeXtWcwx4IwId4mlW5iMAWUq7AdA-bSbKmSHKWTYGzOOdIcrfFVoOevHYW1cWOU11kbO2MIJK9qlQBXmbqeG1BZqzsxWa81-UaCGPX1tfNRByJfnyykcule_mbvRiVeMsQs7ykLMoK-6JG70hHqJPjZwFunoBoCpufZu97zXjgoDBYW8iBl0Gq1qWAaW05a1uo17JzXzVC_HdOwQAfxx_720E3eW345-933bNlkFYLSukQH1GLNd6MJD6lh7RkPYtF0RCA2yuArDlHsE0iQnWtEcY1M2WG2CuaMvCiRaXs8i3XC0TujDqMgz7PyytHn8BSKkJUQ)
+[Link to diagram](https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/full-merm.svg)
+                
+There's also an annotated version of the larger diagram [here](https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/transformer-full-updated.png).
 
 
 A few shortctus to make your lives easier when using these models:
@@ -365,9 +374,9 @@ Further, *some* models are trained to need a BOS token (OPT and my interpretabil
 
 ### Exercise - how many words does your model guess correctly?
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~10 minutes on this exercise.
 ```
@@ -479,9 +488,9 @@ You can use the diagram from the **Transformer Architecture** section to help yo
 
 ### Exercise - verify activations
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -504,7 +513,7 @@ print("Tests passed!")
 
 You'll need to use three different cache indexes in all:
 
-* `gpt2_cache["pattern", 0]` to get the attention patterns, which have shape `[seqQ, seqK]`
+* `gpt2_cache["pattern", 0]` to get the attention patterns, which have shape `[nhead, seqQ, seqK]`
 * `gpt2_cache["q", 0]` to get the query vectors, which have shape `[seqQ, nhead, headsize]`
 * `gpt2_cache["k", 0]` to get the key vectors, which have shape `[seqK, nhead, headsize]`
 
@@ -611,9 +620,9 @@ cv.activations.text_neuron_activations(
 
 The next function shows which words each of the neurons activates most / least on (note that it requires some weird indexing to work correctly).
 
+```python
 neuron_activations_for_all_layers_rearranged = utils.to_numpy(einops.rearrange(neuron_activations_for_all_layers, "seq layers neurons -> 1 layers seq neurons"))
 
-```python
 cv.topk_tokens.topk_tokens(
     # Some weird indexing required here ¯\_(ツ)_/¯
     tokens=[gpt2_str_tokens], 
@@ -650,6 +659,80 @@ def section_2():
         <li><a class='contents-el' href='#looking-for-induction-attention-patterns'>Looking for Induction Attention Patterns</a></li>
         <li><a class='contents-el' href='#exercise-make-an-induction-head-detector'><b>Exercise</b> - make an induction-head detector</a></li>
 </ul></li>""", unsafe_allow_html=True)
+    
+
+    # graph TD
+    #     subgraph "<span style='font-size:24px'>TransformerBlock (attn only)</span>"
+    #         classDef empty width:0px,height:0px;
+    #         classDef code color:red;
+
+    #         resid_pre["resid_pre<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]---D[ ]:::empty-->|add|resid_post
+            
+    #         subgraph "<span style='font-size:24px'>attn &emsp; &emsp; &emsp;&emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</span>"
+    #             v
+    #             q
+    #             k
+    #             attn_scores
+    #             F
+    #             pattern
+    #             G
+    #             z
+    #             result
+    #         end
+    #         resid_pre-->|W_V|v["v<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, nhead, d_head)</code>"]---G[ ]:::empty-->|weighted avg of value vectors|z["z<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, nhead, d_head)</code>"] --> |W_O|result["result<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, nhead, d_model)</code>"] -->|sum over heads|attn_out["attn_out<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]---D
+    #         resid_pre-->|W_Q|q["q<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, nhead, d_head)</code>"]---F[ ]:::empty-->|dot product along d_head, scale and mask|attn_scores["attn_scores<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(nhead, seqQ, seqK)</code>"]-->|softmax|pattern["pattern<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(nhead, seqQ, seqK)</code>"]---G
+    #         resid_pre-->|W_K|k["k<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, nhead, d_head)</code>"]---F
+            
+    #         resid_post["resid_post<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]
+            
+    #     end
+
+
+
+    # graph TD
+    #     subgraph "<span style='font-size:24px'>TransformerBlock</span>"
+    #         classDef empty width:0px,height:0px;
+    #         classDef code color:red;
+
+    #         resid_pre["resid_pre<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]---D[ ]:::empty-->|add|resid_mid---E[ ]:::empty-->|add|resid_post["resid_post<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]
+            
+    #         subgraph "<span style='font-size:24px'>ln1 &emsp; &emsp;&emsp;&emsp; &emsp; &emsp; &emsp; &emsp;&emsp;&emsp;&emsp; &emsp; &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</span>"
+    #             scale
+    #             normalized
+    #         end
+    #         resid_pre --> |subtract mean, divide by std|scale["scale<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, 1)</code>"] --> |W_ln, b_ln|normalized["normalized<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]
+            
+    #         subgraph "<span style='font-size:24px'>attn &emsp;&emsp; &emsp; &emsp;&emsp;&emsp;&emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp; &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</span>"
+    #             v
+    #             q
+    #             k
+    #             attn_scores
+    #             F
+    #             pattern
+    #             G
+    #             z
+    #             result
+    #         end
+    #         normalized-->|W_V, b_V|v["v<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, head_idx, d_head)</code>"]---G[ ]:::empty-->|weighted avg of value vectors|z["z<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, head_idx, d_head)</code>"] --> |W_O|result["result<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, head_idx, d_model)</code>"] -->|sum over heads, add bias b_O|attn_out["attn_out<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]---D
+    #         normalized-->|W_Q, b_Q|q["q<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, head_idx, d_head)</code>"]---F[ ]:::empty-->|dot product along d_head, scale and mask|attn_scores["attn_scores<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(head_idx, seqQ, seqK)</code>"]-->|softmax|pattern["pattern<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(head_idx, seqQ, seqK)</code>"]---G
+    #         normalized-->|W_K, b_K|k["k<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, head_idx, d_head)</code>"]---F
+            
+    #         subgraph "<span style='font-size:24px'>ln2 &emsp;&emsp; &emsp; &emsp; &emsp;</span>"
+    #             scale2
+    #             normalized2
+    #         end
+    #         resid_mid["resid_mid<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"] --> |subtract mean, divide by std|scale2["scale<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, 1)</code>"] --> |W_ln, b_ln|normalized2["normalized<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"]
+            
+    #         subgraph "<span style='font-size:24px'>mlp &emsp; &emsp; &emsp; &emsp;&emsp;&emsp;</span>"
+    #             normalized2
+    #             pre
+    #             post
+    #         end
+    #         normalized2 --> |W_in, b_in|pre["pre<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, 4 * d_model)</code>"] --> |act_fn|post["post<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, 4 * d_model)</code>"] -->|W_out, b_out|mlp_out["mlp_out<div style='border-top:2px solid black;margin-top:4px'></div><code style='color:red;font-size:12px'>(seq, d_model)</code>"] --- E 
+    #     end
+
+
+
 
     st.markdown(r"""
 
@@ -720,15 +803,15 @@ model = HookedTransformer(cfg)
 pretrained_weights = t.load(weights_dir, map_location=device)
 model.load_state_dict(pretrained_weights)
 ```
-
-Use the [diagram at this link](https://mermaid.ink/svg/pako:eNrNVsFu2zAM_RVBh7UDYnQLdnKyHIasOfQwFCu2Q10EikXHhmVJkWQ3Sd1_H-U4dR2kQLFDEx0kUibtR_pR1BONFQca0qVhOiV300gSHLZc7DYiOraaSWLdRsD3i0RJF9hsC-Hwm15fTO4MkzZRpgDzQ6g4J5fMOUmUFJvP4yvvOYno7pV-xIJZO4WEQKHdhjxm3KXhF70epJAtU-fF0RFrDxEnoUxogKNFZ2PAZnyuDdxH9EUe86zaI14ow8EETulwqNfEKpFxshAszkcFM8tMNo-aYMZX6DcZN19rvbuPdpF_HXrjSwurAeHzAq0Fxuq9MNaHIAim9-QhDMMmxiCY1IzzusWmrOuwd9J7090k9xMUVo_6y7G9dyz_Nx_5sX5UfXXVV_O-6iOZ21hhXvoPrvuqRkMwsr8566vbvoqvLMWrNIPkR_jif8zf-Z-6QuJUH0cYmQLjnjd-7dNmdkCbx6YmgBNWLYlKSMVECaSC2Clj6y3i3p4eN0GkBBP5q96lfVeGKJwA2mEpemy1LQuiKjDEW9m64Z0qPc69eOrT4k1y3tYrhLk6C3JeH5CTK0e0UbyMHWFCyWXrNSA2ZgIIk5wUzOb1q0Lf53ynfUhYbUQY3W0z3_SiQnaoxBVsXbfHDCJspTNAF8zeZMZNnSPU_DyYcayhde2u68uonLLUDmFiW6ADiheXgmUcL0BPfjuiLoUCIhqiyCFhvpNgn3tG01Jz5uAnz_D8pWHChIUBZaVTvzcypqEzJeyNphnDfl60Vs__ANh9IJM) to remind yourself of the relevant hook names.
+                
+Use the [diagram at this link](https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/small-merm.svg) to remind yourself of the relevant hook names.
 
 
 ### Exercise - visualise attention patterns
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~10 minutes on this exercise.
 
@@ -794,9 +877,9 @@ Now that we've observed our three basic attention patterns, it's time to make de
 
 ### Exercise - write your own detectors
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 15-20 minutes on these exercises.
 
@@ -928,7 +1011,7 @@ Now, it's time to turn our attention to induction heads.
 
 There's a few particularly striking things about induction heads:
 
-* They develop fairly suddenly in a phase change - from about 2B to 4B tokens we go from no induction heads to pretty well developed ones. This is a striking divergence from a 1L model [see the training curves for this model vs a 1L one](https://wandb.ai/mechanistic-interpretability/attn-only/reports/loss_ewma-22-08-24-11-08-65---VmlldzoyNTI0MDQx?accessToken=extt248d3qoxbqw1zy05kplylztjmx2uqaui3ctqb0zruem0tkpwrssq2ao1su3j) and can be observed in much larger models (eg a 13B one)
+* They develop fairly suddenly in a phase change - from about 2B to 4B tokens we go from no induction heads to pretty well developed ones. This is a striking divergence from a 1L model [see the comparison of in context learning performance curves curves for models with different layers](https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html#:~:text=Our%20first%20observation) and can be observed in much larger models (eg a 13B one)
     * Phase changes are particularly interesting (and depressing) from an alignment perspective, because the prospect of a sharp left turn, or emergent capabilities like deception or situational awareness seems like worlds where alignment may be harder, and we get caught by surprise without warning shots or simpler but analogous models to test our techniques on.
 * They are responsible for a significant loss decrease - so much so that there's a visible bump in the loss curve when they develop (this change in loss can be pretty comparable to the increase in loss from major increases in model size, though this is hard to make an apples-to-apples comparison)
 * They seem to be responsible for the vast majority of in-context learning - the ability to use far back tokens in the context to predict the next token. This is a significant way in which transformers outperform older architectures like RNNs or LSTMs, and induction heads seem to be a big part of this.
@@ -962,9 +1045,9 @@ Note - we're using small sequences (and just one sequence), since the results ar
 
 ### Exercise - plot per-token loss on repeated sequence
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 10-15 minutes on these exercises.
 ```
@@ -1093,9 +1176,9 @@ You should see that heads 4 and 10 are strongly induction-y, and the rest aren't
 
 ### Exercise - make an induction-head detector
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 5-10 minutes on this exercise.
 
@@ -1365,9 +1448,9 @@ Note that, in theory, this could all be done using the `run_with_cache` function
 
 ### Exercise - calculate induction scores with hooks
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 15-20 minutes on this exercise.
 
@@ -1472,9 +1555,9 @@ def induction_score_hook(
 
 ### Exercise - find induction heads in GPT2-small
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 10-20 minutes on this exercise.
 
@@ -1567,7 +1650,7 @@ A consequence of the residual stream is that the output logits are the sum of th
 
 Let's say that our model knows that the token Harry is followed by the token Potter, and we want to figure out how it does this. The logits on Harry are `residual @ W_U`. But this is a linear map, and the residual stream is the sum of all previous layers `residual = embed + attn_out_0 + attn_out_1`. So `logits = (embed @ W_U) + (attn_out @ W_U) + (attn_out_1 @ W_U)`
 
-We can be even more specific, and *just* look at the logit of the Potter token - this corresponds to a row of `W_U`, and so a direction in the residual stream - our logit is now a single number that is the sum of `(embed @ potter_U) + (attn_out_0 @ potter_U) + (attn_out_1 @ potter_U)`. Even better, we can decompose each attention layer output into the sum of the result of each head, and use this to get many terms.
+We can be even more specific, and *just* look at the logit of the Potter token - this corresponds to a column of `W_U`, and so a direction in the residual stream - our logit is now a single number that is the sum of `(embed @ potter_U) + (attn_out_0 @ potter_U) + (attn_out_1 @ potter_U)`. Even better, we can decompose each attention layer output into the sum of the result of each head, and use this to get many terms.
 </details>
 
 Your mission here is to write a function to look at how much each component contributes to the correct logit. Your components are:
@@ -1600,9 +1683,9 @@ Because log probs aren't linear, they go through `log_softmax`, a non-linear fun
 
 ### Exercise - build logit attribution tool
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 10-15 minutes on this exercise.
 
@@ -1744,9 +1827,9 @@ This is because of a point we discussed earlier - this plot doesn't pick up on t
 
 ### Exercise - logit attribution for the induction heads
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than ~10 minutes on this exercise.
 
@@ -1819,16 +1902,16 @@ As mentioned in [the glossary](https://dynalist.io/d/n2ZWtnoYHrU1s4vnFSAQ519J#z=
 
 ### Exercise - induction head ablation
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than ~10 minutes on this exercise.
 
 This exercise is conceptually important, but very short.
 ```
 
-The code below provides a template for performing zero-ablation on the value vectors at a particular head (i.e. the vectors we get when applying the weight matrices `W_V` to the residual stream). If you're confused about what different activations mean, you can refer back to [the diagram](https://mermaid.ink/svg/pako:eNrNVsFu2zAM_RVBh7UDYnQLdnKyHIasOfQwFCu2Q10EikXHhmVJkWQ3Sd1_H-U4dR2kQLFDEx0kUibtR_pR1BONFQca0qVhOiV300gSHLZc7DYiOraaSWLdRsD3i0RJF9hsC-Hwm15fTO4MkzZRpgDzQ6g4J5fMOUmUFJvP4yvvOYno7pV-xIJZO4WEQKHdhjxm3KXhF70epJAtU-fF0RFrDxEnoUxogKNFZ2PAZnyuDdxH9EUe86zaI14ow8EETulwqNfEKpFxshAszkcFM8tMNo-aYMZX6DcZN19rvbuPdpF_HXrjSwurAeHzAq0Fxuq9MNaHIAim9-QhDMMmxiCY1IzzusWmrOuwd9J7090k9xMUVo_6y7G9dyz_Nx_5sX5UfXXVV_O-6iOZ21hhXvoPrvuqRkMwsr8566vbvoqvLMWrNIPkR_jif8zf-Z-6QuJUH0cYmQLjnjd-7dNmdkCbx6YmgBNWLYlKSMVECaSC2Clj6y3i3p4eN0GkBBP5q96lfVeGKJwA2mEpemy1LQuiKjDEW9m64Z0qPc69eOrT4k1y3tYrhLk6C3JeH5CTK0e0UbyMHWFCyWXrNSA2ZgIIk5wUzOb1q0Lf53ynfUhYbUQY3W0z3_SiQnaoxBVsXbfHDCJspTNAF8zeZMZNnSPU_DyYcayhde2u68uonLLUDmFiW6ADiheXgmUcL0BPfjuiLoUCIhqiyCFhvpNgn3tG01Jz5uAnz_D8pWHChIUBZaVTvzcypqEzJeyNphnDfl60Vs__ANh9IJM).
+The code below provides a template for performing zero-ablation on the value vectors at a particular head (i.e. the vectors we get when applying the weight matrices `W_V` to the residual stream). If you're confused about what different activations mean, you can refer back to [the diagram](https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/small-merm.svg).
 
 **The only thing left for you to do is fill in the function `head_ablation_hook`** so that it performs zero-ablation on the head given by `head_index_to_ablate`. In other words, your function should return a modified version of `value` with this head ablated. (Technically you don't have to return any tensor if you're modifying `value` in-place; this is just convention.)
 
@@ -2099,6 +2182,10 @@ If $A$ is the one-hot encoding for token `A`, then:
 * $A^T W_E W_{OV}^h$ is the vector which would get written to the residual stream at the destination position, if the destination token only pays attention to `A`.
 * $A^T W_E W_{OV}^h W_U$ is the unembedding of this vector, i.e. the thing which gets added to the final logits.
 
+So if the $(A, B)$-th element of this matrix is large, the interpretation is that we will predict $B$ comes next for any token which attends to $A$.
+                
+For example, a common pattern is a copying circuit: the diagonal elements $(A, A)$ are large, meaning that whatever token is attended to will also be predicted.
+
 </details>
 
 #### $W_{QK}^{h}$
@@ -2192,9 +2279,9 @@ This is all possible because knowing the factorisation of a matrix gives us a mu
 
 ### Exercise - deriving properties of a factored matrix
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than 10-25 minutes on this exercise.
 
@@ -2296,7 +2383,7 @@ $$
 \end{aligned}
 $$
 
-where $U = U_A U'$, $V = V_B V'$, and $S = S' S_B$.
+where $U = U_A U'$, $V = V_B V'$, and $S = S'$.
 
 All our SVD calculations and matrix multiplications had complexity at most $O(mn^2)$, which is much better than $O(m^3)$ (remember that we don't need to compute all the values of $U = U_A U'$, only the ones which correspond to non-zero singular values).
 </details>
@@ -2434,7 +2521,7 @@ If this still seems confusing, let's break it down bit by bit. We have:
 
 ---
 
-<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/kcomp_diagram_described-OV-last.png" width="400">
+<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/kcomp_diagram_described-OV-end.png" width="400">
 
 </details>
 
@@ -2449,7 +2536,10 @@ You should compute it as a `FactoredMatrix` object.
 Remember, you can access the model's weights directly e.g. using `model.W_E` or `model.W_Q` (the latter gives you all the `W_Q` matrices, indexed by layer and head).
 
 ```python
-# YOUR CODE HERE - compute OV circuit
+layer = 1
+head_index = 4
+
+# YOUR CODE HERE - compte the `full_OV_circuit` object
 
 tests.test_full_OV_circuit(full_OV_circuit, model, layer, head_index)
 ```
@@ -2491,9 +2581,9 @@ full_OV_circuit = W_E @ OV_circuit @ W_U
 
 ### Exercise - verify this is the identity
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 5-10 minutes on this exercise.
 
@@ -2622,9 +2712,9 @@ This should return about 30.79% - pretty underwhelming. It goes up to 47.73% for
 
 ### Exercise - compute effective circuit
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 5-10 minutes on this exercise.
 
@@ -2698,9 +2788,9 @@ Why is it justified to ignore token encodings? In this case, it turns out that t
 
 ### Exercise - compute full QK-circuit for `0.7`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 10-15 minutes on this exercise.
 
@@ -2793,9 +2883,9 @@ with each $y_i$ having shape `[seq, d_model]`, and the sum of $y_i$s being the f
 
 ### Exercise - analyse the relative importance
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 15-25 minutes on these exercises.
 
@@ -2894,7 +2984,7 @@ def decompose_q(decomposed_qk_input: t.Tensor, ind_head_index: int) -> t.Tensor:
 
     return einops.einsum(
         decomposed_qk_input, W_Q,
-        "n seq d_head, d_head d_model -> n seq d_model"
+        "n seq d_model, d_model d_head -> n seq d_head"
     )
 
 def decompose_k(decomposed_qk_input: t.Tensor, ind_head_index: int) -> t.Tensor:
@@ -2908,7 +2998,7 @@ def decompose_k(decomposed_qk_input: t.Tensor, ind_head_index: int) -> t.Tensor:
 
     return einops.einsum(
         decomposed_qk_input, W_K,
-        "n seq d_head, d_head d_model -> n seq d_model"
+        "n seq d_model, d_model d_head -> n seq d_head"
     )
 ```
 </details>
@@ -2934,9 +3024,9 @@ This is a bilinear function of q and k, and so we will end up with a `decomposed
 
 ### Exercise - decompose attention scores
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 5-10 minutes on this exercise.
 
@@ -3090,9 +3180,9 @@ An illustration:
 
 ### Exercise - compute the K-comp circuit
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You shouldn't spend more than 10-20 minutes on this exercise.
 ```
@@ -3209,9 +3299,9 @@ How do we formalise overlap? This is basically an open question, but a surprisin
 
 ### Exercise - calculate composition scores
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You shouldn't spend more than 15-25 minutes on these exercises.
 
@@ -3288,7 +3378,7 @@ W_OV = model.W_V @ model.W_O
 # Define tensors to hold the composition scores
 composition_scores = {
     "Q": t.zeros(model.cfg.n_heads, model.cfg.n_heads).to(device),
-    "Κ": t.zeros(model.cfg.n_heads, model.cfg.n_heads).to(device),
+    "K": t.zeros(model.cfg.n_heads, model.cfg.n_heads).to(device),
     "V": t.zeros(model.cfg.n_heads, model.cfg.n_heads).to(device),
 }
 
@@ -3304,9 +3394,9 @@ for i in tqdm(range(model.cfg.n_heads)):
 
 ### Exercise - Setting a Baseline
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You shouldn't spend more than ~10 minutes on this exercise.
 ```
@@ -3473,9 +3563,9 @@ To build intuition, let's consider a couple of extreme examples.
 
 ### Exercise - batching, and using the `FactoredMatrix` class
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵⚪⚪⚪⚪
 
 This exercise is optional, and not a vitally important conceptual part  of this section. It's also quite messy to rearrange our tensors in the right way! You are invited to skip it if you want.
 ```
@@ -3721,7 +3811,11 @@ Here are a few questions for you:
 
 
 func_page_list = [
-    (section_0, "🏠 Home"),     (section_1, "1️⃣ TransformerLens: Introduction"),     (section_2, "2️⃣ Finding induction heads"),     (section_3, "3️⃣ TransformerLens: Hooks"),     (section_4, "4️⃣ Reverse-engineering induction circuits"), 
+    (section_0, "🏠 Home"),
+    (section_1, "1️⃣ TransformerLens: Introduction"),
+    (section_2, "2️⃣ Finding induction heads"),
+    (section_3, "3️⃣ TransformerLens: Hooks"),
+    (section_4, "4️⃣ Reverse-engineering induction circuits"), 
 ]
 
 func_list = [func for func, page in func_page_list]
@@ -3738,3 +3832,8 @@ def page():
     func()
 
 page()
+
+
+streamlit_analytics.stop_tracking(
+    unsafe_password=st.secrets["analytics_password"],
+)

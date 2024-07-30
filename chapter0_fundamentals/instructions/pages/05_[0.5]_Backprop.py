@@ -14,6 +14,11 @@ st_dependencies.styling()
 import platform
 is_local = (platform.processor() != "")
 
+import streamlit_analytics
+streamlit_analytics.start_tracking()
+
+st.error("This is no longer the most updated version of these exercises: see [here](https://arena3-chapter0-fundamentals.streamlit.app/) for the newest page.", icon="🚨")
+
 def section_0():
 
     st.sidebar.markdown(r"""
@@ -24,26 +29,30 @@ def section_0():
     <li class='margtop'><a class='contents-el' href='#introduction'>Introduction</a></li>
     <li class='margtop'><a class='contents-el' href='#content-learning-objectives'>Content & Learning Objectives</a></li>
     <li><ul class="contents">
-        <li><a class='contents-el' href='#110125-introduction'>1️⃣ Introduction</a></li>
-        <li><a class='contents-el' href='#1010125-autograd'>2️⃣ Autograd</a></li>
-        <li><a class='contents-el' href='#12510125-more-forward-backward-functions'>3️⃣ More forward & backward functions</a></li>
-        <li><a class='contents-el' href='#1010125-putting-everything-together'>4️⃣ Putting everything together</a></li>
-        <li><a class='contents-el' href='#1310125-bonus'>5️⃣ Bonus</a></li>
+        <li><a class='contents-el' href='#1-introduction'>1️⃣ Introduction</a></li>
+        <li><a class='contents-el' href='#2-autograd'>2️⃣ Autograd</a></li>
+        <li><a class='contents-el' href='#3-more-forward-backward-functions'>3️⃣ More forward & backward functions</a></li>
+        <li><a class='contents-el' href='#4-putting-everything-together'>4️⃣ Putting everything together</a></li>
+        <li><a class='contents-el' href='#5-bonus'>5️⃣ Bonus</a></li>
     </ul></li>
     <li class='margtop'><a class='contents-el' href='#setup'>Setup</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
+    st.markdown(
+r"""
 
-<img src="https://raw.githubusercontent.com/callummcdougall/Fundamentals/main/images/backprop.png" width="350">
+# [0.5] - Build Your Own Backpropagation Framework
 
-
-Colab: [**exercises**](https://colab.research.google.com/drive/1_aeNgUU8H7psOH8jttByO_8lv9Wp7O0o) | [**solutions**](https://colab.research.google.com/drive/1Fs7nvNbeDirDi2KEtN5rxWAzLba_tvbu)
+### Colab: [**exercises**](https://colab.research.google.com/drive/1_aeNgUU8H7psOH8jttByO_8lv9Wp7O0o) | [**solutions**](https://colab.research.google.com/drive/1Fs7nvNbeDirDi2KEtN5rxWAzLba_tvbu)
 
 Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
 
+You can toggle dark mode from the buttons on the top-right of this page.
 
-# [0.5] - Build Your Own Backpropagation Framework
+Links to other chapters: [**(1) Transformers & Mech Interp**](https://arena-ch1-transformers.streamlit.app/), [**(2) RL**](https://arena-ch2-rl.streamlit.app/).
+
+<img src="https://raw.githubusercontent.com/callummcdougall/Fundamentals/main/images/backprop.png" width="350">
+
 
 
 ## Introduction
@@ -130,11 +139,10 @@ Arr = np.ndarray
 grad_tracking_enabled = True
 
 # Make sure exercises are in the path
-chapter = r"chapter0_fundamentals"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = exercises_dir / "part5_backprop"
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part5_backprop', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
-os.chdir(section_dir)
 
 import part5_backprop.tests as tests
 from part5_backprop.utils import visualize, get_mnist
@@ -255,7 +263,7 @@ def multiply_back(grad_out, out, a, b):
     return grad_out * b
 ```
 
-where `grad_out` is the gradient of the output of the function with respect to the loss (i.e. $\frac{dL}{dd}$), `out` is the output of the function (i.e. $d$), and `a` and `b` are our inputs.
+where `grad_out` is the gradient of the loss with respect to the output of the function (i.e. $\frac{dL}{dd}$), `out` is the output of the function (i.e. $d$), and `a` and `b` are our inputs.
 
 
 ### Topological Ordering
@@ -328,9 +336,9 @@ The most obvious answer is the exponential function, `out = e ^ x`. Here, the gr
 
 ### Exercise - implement `log_back`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 5-10 minutes on this exercise.
 ```
@@ -517,9 +525,9 @@ We used the term "unbroadcast" because the way that our tensor's shape changes w
 
 ### Exercise - implement `unbroadcast`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 
@@ -604,9 +612,9 @@ Functions that are differentiable with respect to more than one input tensor are
 
 ### Exercise - implement both `multiply_back` functions
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 10-15 minutes on these exercises.
 ```
@@ -674,9 +682,9 @@ Now we'll use our backward functions to do backpropagation manually, for the fol
 
 ### Exercise - implement `forward_and_back`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 15-20 minutes on these exercises.
 
@@ -841,7 +849,7 @@ Note that `args` just stores the values of the underlying arrays, but `parents` 
 
 Here are some examples, to build intuition for what the four fields of `Recipe` are, and why we need all four of them to fully describe a tensor in our graph and how it was created:
 
-<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/recipe-better.png" width="800">
+<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/recipe-fixed.png" width="800">
 
 
 ## Registering backwards functions
@@ -851,9 +859,9 @@ The `Recipe` takes care of tracking the forward functions in our computational g
 
 ### Exercise - implement `BackwardFuncLookup`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on these exercises.
 
@@ -1113,9 +1121,9 @@ Let's start with a simple case: our `log` function. `log_forward` is a wrapper, 
 
 ### Exercise - implement `log_forward`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 ```
@@ -1206,9 +1214,9 @@ Now let's do the same for multiply, to see how to handle functions with multiple
 
 ### Exercise - implement `multiply_forward`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 ```
@@ -1303,9 +1311,9 @@ Implement the higher order function `wrap_forward_fn` that takes a `Arr -> Arr` 
 
 ### Exercise - implement `wrap_forward_fn`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -1456,9 +1464,9 @@ As part of backprop, we need to sort the nodes of our graph so we can traverse t
 
 ### Exercise - implement `topological_sort`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -1725,9 +1733,9 @@ In the computational graph in the next section, the only leaves are `a`, `b` and
 
 ### Exercise - implement `backprop`
 
-```c
-Difficulty: 🟠🟠🟠🟠🟠
-Importance: 🟠🟠🟠🟠🟠
+```yaml
+Difficulty: 🔴🔴🔴🔴🔴
+Importance: 🔵🔵🔵🔵🔵
 
 You should spend up to 30-40 minutes on this exercise.
 
@@ -1765,6 +1773,7 @@ if MAIN:
     tests.test_backprop_branching(Tensor)
     tests.test_backprop_requires_grad_false(Tensor)
     tests.test_backprop_float_arg(Tensor)
+    tests.test_backprop_shared_parent(Tensor)
 
 ```
 
@@ -1996,9 +2005,9 @@ if MAIN:
 
 ### Exercise - `negative`
 
-```c
-Difficulty: 🟠⚪⚪⚪⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴⚪⚪⚪⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You should spend up to 5-10 minutes on this exercise.
 ```
@@ -2035,9 +2044,9 @@ def negative_back(grad_out: Arr, out: Arr, x: Arr) -> Arr:
 
 ### Exercise - `exp`
 
-```c
-Difficulty: 🟠⚪⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴⚪⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 5-10 minutes on this exercise.
 ```
@@ -2072,9 +2081,9 @@ def exp_back(grad_out: Arr, out: Arr, x: Arr) -> Arr:
 
 ### Exercise - `reshape`
 
-```c
-Difficulty: 🟠⚪⚪⚪⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴⚪⚪⚪⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You should spend up to 5-10 minutes on this exercise.
 ```
@@ -2113,9 +2122,9 @@ def reshape_back(grad_out: Arr, out: Arr, x: Arr, new_shape: tuple) -> Arr:
 
 ### Exercise - `permute`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -2207,9 +2216,9 @@ def invert_transposition(axes: tuple) -> tuple:
 
 ### Exercise - `expand`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 ```
@@ -2308,9 +2317,9 @@ def _expand(x: Arr, new_shape) -> Arr:
 
 ### Exercise - `sum`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 ```
@@ -2369,9 +2378,9 @@ def sum_back(grad_out: Arr, out: Arr, x: Arr, dim=None, keepdim=False):
 
 ### Exercise - Indexing
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 ```
@@ -2470,9 +2479,9 @@ def getitem_back(grad_out: Arr, out: Arr, x: Arr, index: Index):
 
 ### elementwise add, subtract, divide
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -2602,9 +2611,9 @@ if MAIN:
 
 ### Exercise - `max`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -2672,9 +2681,9 @@ def maximum_back1(grad_out: Arr, out: Arr, x: Arr, y: Arr):
 
 ### Exercise - functional `ReLU`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -2715,9 +2724,9 @@ def relu(x: Tensor) -> Tensor:
 
 ### Exercise - 2D `matmul`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 20-25 minutes on this exercise.
 ```
@@ -2826,9 +2835,9 @@ def section_4():
 
 ## Exercise - build your own `nn.Parameter`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -2877,9 +2886,9 @@ class Parameter(Tensor):
 
 ## Exercise - build your own `nn.Module`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 25-30 minutes on this exercise.
 ```
@@ -3058,9 +3067,9 @@ class Module:
 
 ## Build Your Own Linear Layer
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 20-25 minutes on this exercise.
 ```
@@ -3198,9 +3207,9 @@ class MLP(Module):
 
 ## Build Your Own Cross-Entropy Loss
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -3262,9 +3271,9 @@ def cross_entropy(logits: Tensor, true_labels: Tensor) -> Tensor:
 
 ## Build your own `NoGrad` context manager
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -3571,7 +3580,12 @@ So far we've registered a separate backwards for each input argument that could 
 
 
 func_page_list = [
-    (section_0, "🏠 Home"),     (section_1, "1️⃣ Introduction"),     (section_2, "2️⃣ Autograd"),     (section_3, "3️⃣ More forward & backward functions"),     (section_4, "4️⃣ Putting everything together"),     (section_5, "5️⃣ Bonus"), 
+    (section_0, "🏠 Home"),
+    (section_1, "1️⃣ Introduction"),
+    (section_2, "2️⃣ Autograd"),
+    (section_3, "3️⃣ More forward & backward functions"),
+    (section_4, "4️⃣ Putting everything together"),
+    (section_5, "5️⃣ Bonus"), 
 ]
 
 func_list = [func for func, page in func_page_list]
@@ -3588,3 +3602,8 @@ def page():
     func()
 
 page()
+
+
+streamlit_analytics.stop_tracking(
+    unsafe_password=st.secrets["analytics_password"],
+)

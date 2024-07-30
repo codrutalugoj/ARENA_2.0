@@ -22,9 +22,9 @@ from transformer_lens import utils, HookedTransformer, HookedTransformerConfig, 
 import circuitsvis as cv
 
 # Make sure exercises are in the path
-chapter = r"chapter1_transformers"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = (exercises_dir / "part2_intro_to_mech_interp").resolve()
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part2_intro_to_mech_interp', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
 
 from plotly_utils import imshow, hist, plot_comp_scores, plot_logit_attribution, plot_loss_difference
@@ -741,7 +741,7 @@ def decompose_q(decomposed_qk_input: t.Tensor, ind_head_index: int) -> t.Tensor:
 
 	return einops.einsum(
 		decomposed_qk_input, W_Q,
-		"n seq d_head, d_head d_model -> n seq d_model"
+		"n seq d_model, d_model d_head -> n seq d_head"
 	)
 
 
@@ -755,7 +755,7 @@ def decompose_k(decomposed_qk_input: t.Tensor, ind_head_index: int) -> t.Tensor:
 
 	return einops.einsum(
 		decomposed_qk_input, W_K,
-		"n seq d_head, d_head d_model -> n seq d_model"
+		"n seq d_model, d_model d_head -> n seq d_head"
 	)
 
 

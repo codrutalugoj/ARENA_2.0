@@ -6,13 +6,27 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 import re
-from transformer_lens import HookedTransformer
-from transformer_lens.utils import to_numpy
 from typing import Dict
 import pandas as pd
 from jaxtyping import Float
 import einops
 
+
+def to_numpy(tensor):
+    """
+    Helper function to convert a tensor to a numpy array. Also works on lists, tuples, and numpy arrays.
+    """
+    if isinstance(tensor, np.ndarray):
+        return tensor
+    elif isinstance(tensor, (list, tuple)):
+        array = np.array(tensor)
+        return array
+    elif isinstance(tensor, (t.Tensor, t.nn.parameter.Parameter)):
+        return tensor.detach().cpu().numpy()
+    elif isinstance(tensor, (int, float, bool, str)):
+        return np.array(tensor)
+    else:
+        raise ValueError(f"Input to to_numpy has invalid type: {type(tensor)}")
 
 # GENERIC PLOTTING FUNCTIONS
 
@@ -60,7 +74,6 @@ def line(y: Union[t.Tensor, List[t.Tensor]], renderer=None, **kwargs):
     '''
     kwargs_post = {k: v for k, v in kwargs.items() if k in update_layout_set}
     kwargs_pre = {k: v for k, v in kwargs.items() if k not in update_layout_set}
-    names = kwargs_pre.pop("names", None)
     if "margin" in kwargs_post and isinstance(kwargs_post["margin"], int):
         kwargs_post["margin"] = dict.fromkeys(list("tblr"), kwargs_post["margin"])
     if "xaxis_tickvals" in kwargs_pre:
@@ -92,6 +105,7 @@ def line(y: Union[t.Tensor, List[t.Tensor]], renderer=None, **kwargs):
         fig.show(renderer)
     else:
         y = list(map(to_numpy, y)) if isinstance(y, list) and not (isinstance(y[0], int) or isinstance(y[0], float)) else to_numpy(y)
+        names = kwargs_pre.pop("names", None)
         fig = px.line(y=y, **kwargs_pre).update_layout(**kwargs_post)
         if names is not None:
             fig.for_each_trace(lambda trace: trace.update(name=names.pop(0)))

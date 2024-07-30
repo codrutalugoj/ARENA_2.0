@@ -1,3 +1,4 @@
+.direnv
 *__pycache__
 *generate_*.py
 *drafts
@@ -8,10 +9,20 @@
 *models
 *data
 *wandb
+*videos
 *logs
 secrets.toml
 *attn_only_2L_half.pth
-serimats_app
 *othello_world*
 *Grokking
-*04_PPO.py
+*interp_on_model*.ipynb
+*other_solns
+*gitignore
+*.vscode
+*part4_rlhf2
+*stats.md
+chapter1_transformers/instructions/media/media
+my_regex.py
+october23_duplicate_zeros
+december23_marbles
+december23_arena

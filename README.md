@@ -2,6 +2,8 @@ This GitHub repo hosts the exercises and Streamlit pages for the ARENA 2.0 progr
 
 You can find a summary of each of the chapters below. For more detailed information (including the different ways you can access the exercises), click on the links in the chapter headings.
 
+Additionally, see [this Notion page](https://www.notion.so/ARENA-2-0-Virtual-Resources-7934b3cbcfbf4f249acac8842f887a99?pvs=4) for a guide to the virtual study materials available.
+
 # [Chapter 0: Fundamentals](https://arena-ch0-fundamentals.streamlit.app/)
 
 <img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/prereqs.png" width="400">
@@ -15,7 +17,7 @@ Some highlights from this chapter include:
 * Implementing your own backpropagation mechanism
 
 
-# [Chapter 1: Transformers](https://arena-ch1-transformers.streamlit.app/)
+# [Chapter 1: Transformers & Mech Interp](https://arena-ch1-transformers.streamlit.app/)
 
 <img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/magnifying-glass-2.png" width="400">
 
@@ -46,8 +48,14 @@ Some highlights from this chapter include:
 * Implementing a Deep Q-Network (DQN) and Proximal Policy Optimization (PPO) to play the CartPole game
 * Applying RLHF to autoregressive transformers like the ones you built in the previous chapter
 
-# Chapter 3: Training at Scale
+# [Chapter 3: Training at Scale](https://arena-ch3-training-at-scale.streamlit.app/)
 
 <img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/training_at_scale.png" width="400">
 
-Links coming soon!
+With the advent of large language models, training at scale has become a necessity to create highly competent models. In this chapter we will go through the basics of GPUs and distributed training, along with introductions to libraries that make training at scale easier.
+
+Some highlights from this chapter include:
+
+* Quantizing your model to INT8 for blazing fast inference
+* Implementing distributed training loops using `torch.dist`
+* Getting hands on with Huggingface Accelerate and Microsoft DeepsSpeed

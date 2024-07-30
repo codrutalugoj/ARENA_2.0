@@ -14,6 +14,11 @@ st_dependencies.styling()
 import platform
 is_local = (platform.processor() != "")
 
+import streamlit_analytics
+streamlit_analytics.start_tracking()
+
+st.error("This is no longer the most updated version of these exercises: see [here](https://arena3-chapter0-fundamentals.streamlit.app/) for the newest page.", icon="🚨")
+
 def section_0():
 
     st.sidebar.markdown(r"""
@@ -75,22 +80,22 @@ def section_0():
     <li class='margtop'><a class='contents-el' href='#bonus-more-raytracing'>Bonus - more raytracing</a></li>
 </ul></li>""", unsafe_allow_html=True)
 
-    st.markdown(r"""
-
-<img src="https://raw.githubusercontent.com/callummcdougall/Fundamentals/main/images/raytracing.png" width="350">
-
-
-Colab: [**exercises**](https://colab.research.google.com/drive/1T3yXhK9CgK49HfN_x2WwD2CUv_bcPjA5) | [**solutions**](https://colab.research.google.com/drive/17qAsbvGChdA1zCjJ3QU8bv-4-rXpdppZ)
-
-Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
-
-
+    st.markdown(
+r"""
 # [0.1] - Ray Tracing
 
 
+### Colab: [**exercises**](https://colab.research.google.com/drive/1T3yXhK9CgK49HfN_x2WwD2CUv_bcPjA5) | [**solutions**](https://colab.research.google.com/drive/17qAsbvGChdA1zCjJ3QU8bv-4-rXpdppZ)
+
+Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
+
+You can toggle dark mode from the buttons on the top-right of this page.
+                
+Links to other chapters: [**(1) Transformers & Mech Interp**](https://arena-ch1-transformers.streamlit.app/), [**(2) RL**](https://arena-ch2-rl.streamlit.app/).
+
+<img src="https://raw.githubusercontent.com/callummcdougall/Fundamentals/main/images/raytracing.png" width="350">
+
 ## Introduction
-
-
 
 Today we'll be practicing batched matrix operations in PyTorch by writing a basic graphics renderer. We'll start with an extremely simplified case and work up to rendering your very own 3D Pikachu!
 
@@ -99,7 +104,6 @@ We'll also be touching on some general topics which will be important going forw
 * Using GPT systems to assist your learning and coding
 * Typechecking, and good coding practices
 * Debugging, with VSCode's built-in run & debug features
-
 
 ## Getting started
 
@@ -127,11 +131,9 @@ To run these Streamlit pages locally rather than from the public url, you can na
 
 To complete the actual exercises, you should create the file `answers.py` inside the `chapter0_fundamentals/exercises/part1_ray_tracing` directory, and copy code from this Streamlit page to that Python file. You can run your code like cells in a notebook, by using the characters `# %%` to separate cells.
 
-
 ## Setup
 
 Run these cells below (don't worry about reading through them).
-
 
 ```python
 import os
@@ -148,9 +150,9 @@ from jaxtyping import Float, Int, Bool, Shaped, jaxtyped
 import typeguard
 
 # Make sure exercises are in the path
-chapter = r"chapter0_fundamentals"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = exercises_dir / "part1_ray_tracing"
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part1_ray_tracing', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
 
 from plotly_utils import imshow
@@ -158,7 +160,6 @@ from part1_ray_tracing.utils import render_lines_with_plotly, setup_widget_fig_r
 import part1_ray_tracing.tests as tests
 
 MAIN = __name__ == "__main__"
-
 ```
 
 <details>
@@ -217,27 +218,22 @@ The camera will emit one or more **rays**, where a ray is represented by an **or
 
 We have no concept of lighting or color yet, so for now we'll say that a pixel on our screen should show a bright color if a ray from the origin through it intersects an object, otherwise our screen should be dark.
 
-
 <img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/ray_tracing.png" width="400">
-
 
 To start, we'll let the z dimension in our `(x, y, z)` space be zero and work in the remaining two dimensions. 
 
-
 #### Exercise - implement `make_rays_1d`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
 
-
 Implement the following `make_rays_1d` function so it generates some rays coming out of the origin, which we'll take to be `(0, 0, 0)`.
 
 Calling `render_lines_with_pyplot` on your rays will display them in a 3D plot.
-
 
 ```python
 def make_rays_1d(num_pixels: int, y_limit: float) -> t.Tensor:
@@ -262,7 +258,6 @@ rays1d = make_rays_1d(9, 10.0)
 
 if MAIN:
     fig = render_lines_with_plotly(rays1d)
-
 ```
 
 <details>
@@ -348,9 +343,9 @@ Once we've found values of $u$ and $v$ which satisfy this equation, if any (the 
 
 ### Exercise - which segments intersect with the rays?
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -364,7 +359,6 @@ segments = t.tensor([
     [[0.5, 0.1, 0.0], [0.5, 1.15, 0.0]], 
     [[2, 12.0, 0.0], [2, 21.0, 0.0]]
 ])
-
 ```
 
 <details>
@@ -384,9 +378,9 @@ render_lines_with_plotly(rays1d, segments)
 
 ### Exercise - implement `intersect_ray_1d`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -660,9 +654,9 @@ On the other hand, if `B` had shape `(2,)` then broadcasting would fail, because
 
 ### Exercise - implement `intersect_rays_1d`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 25-30 minutes on this exercise.
 
@@ -826,9 +820,9 @@ Now we're going to make use of the z dimension and have rays emitted from the or
 
 ### Exercise - implement `make_rays_2d`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 ```
@@ -991,9 +985,9 @@ We can therefore find the coordinates `s`, `u`, `v` of the intersection point by
 
 ### Exercise - implement `triangle_ray_intersects`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 15-20 minutes on this exercise.
 ```
@@ -1109,9 +1103,9 @@ Here, `y` was created through basic indexing, so `y` is a view and `y._base` ref
 
 ### Exercise - implement `raytrace_triangle`
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 15-20 minutes on this exercise.
 
@@ -1243,8 +1237,6 @@ imshow(img, origin="lower", width=600, title="Triangle (as intersected by rays)"
 ```
 </details>
 
-
-
 You can debug a cell by clicking on the **Debug cell** option at the bottom of your cell. Your cell should contain the code that is actually run to cause an error (rather than needing to contain the function which is the source of the error). Before you run your debugger, you can set breakpoints by clicking on the left-hand side of the line number (a red dot will appear). You can then step through your code, using the toolbar of buttons which will appear when you run the debugger (see [here](https://pawelgrzybek.com/continue-step-over-step-into-and-step-out-actions-in-visual-studio-code-debugger-explained/) for an explanation of what each of the buttons does). When you reach a breakpoint, you can use the following tools:
 
 * Inspect local and global variables, in the **VARIABLES** window that appears on the left sidebar.
@@ -1257,7 +1249,6 @@ Note, when you run the debugger, it will stop *before* the breakpoint line is ev
 *This all works basically the same if you're in a notebook in VSCode, except for a few changes e.g. the debug button is on the dropdown at the top-left of the cell (if it doesn't appear for you then you'll need to go into user settings and add the line `"notebook.consolidatedRunButton": true`).*
 
 There's much more detail we could go into about debugging, but this will suffice for most purposes. It's generally a much more efficient way of debugging than using print statements or asserts (although these can also be helpful in some situations).
-
 
 <details>
 <summary>Answer - what are the bugs, and how can they be fixed?</summary>
@@ -1291,21 +1282,16 @@ This error is a bit harder to diagnose, because the line causing an error is aft
 These were all relatively easy bugs to diagnose (not all bugs will present as actual errors in your code, some might just be an unexpected set of results). But hopefully this has given you a sense for how to use the debugger. It's a very powerful tool, and can save you a lot of time!
 </details>
 
-
 \**If you're using Colab, you'll have to use different strategies for debugging. See [this page](https://zohaib.me/debugging-in-google-collab-notebook/) for one suggested approach.*
-
 
 ## Mesh Loading
 
 Use the given code to load the triangles for your Pikachu. By convention, files written with `torch.save` end in the `.pt` extension, but these are actually just zip files.
 
-
 ```python
-
 if MAIN:
     with open(section_dir / "pikachu.pt", "rb") as f:
         triangles = t.load(f)
-
 ```
 
 ## Mesh Rendering
@@ -1314,12 +1300,11 @@ For our purposes, a mesh is just a group of triangles, so to render it we'll int
 
 For each ray (pixel) we will return a float representing the minimum distance to a triangle if applicable, otherwise the special value `float('inf')` representing infinity. We won't return which triangle was intersected for now.
 
-
 ### Exercise - implement `raytrace_mesh`
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 20-25 minutes on this exercise.
 
@@ -1329,7 +1314,6 @@ This is the main function we've been building towards, and marks the end of the 
 Implement `raytrace_mesh` and as before, reshape and visualize the output. Your Pikachu is centered on (0, 0, 0), so you'll want to slide the ray origin back to at least `x=-2` to see it properly.
 
 Reminder - `t.linalg.solve` (and most batched operations) can accept multiple dimensions as being batch dims. Previously, you've just used `NR` (the number of rays) as the batch dimension, but you can also use `(NR, NT)` (the number of rays and triangles) as your batch dimensions, so you can solve for all rays and triangles at once.
-
 
 ```python
 def raytrace_mesh(
@@ -1359,12 +1343,10 @@ if MAIN:
     for i, text in enumerate(["Intersects", "Distance"]): 
         fig.layout.annotations[i]['text'] = text
     fig.show()
-
 ```
 
 <details>
 <summary>Solution</summary>
-
 
 ```python
 def raytrace_mesh(
@@ -1414,19 +1396,17 @@ def raytrace_mesh(
 
 ---
 
-
-Congratulations, you've now got to the end of the exercises! Click the button below to see the entire reason we decided to host these exercises in Streamlit rather than in markdown files.
+Congratulations, you've now got to the end of the exercises! Click the button below to see why we decided to host these exercises in Streamlit rather than in markdown files.
 
 
 """, unsafe_allow_html=True)
     button = st.button("Click me to celebrate!")
     if button:
         st.balloons()
-    st.markdown(r"""
-
+    st.markdown(
+r"""
 
 ---
-
 
 ## Bonus - testing with `pytest`
 
@@ -1483,7 +1463,7 @@ if MAIN:
 
 3. **From VSCode's testing display**
 
-This is by far the most useful way to run test functions. VSCode provides a helpful interface to run all test functions in your directory, and see which of them have passed. First, press the test icon on the left hand sidebar (it will look like a triangular flask). If this is your first time, then you'll need to click on the **Configure Python Tests** button, then select `pytest` as your framework (you may have to install pytest when prompted). This should automatically perform test discovery for you, showing you all the test files & functions in your current directory in the left hand window (it detects this the same way pytest does, using the `test_` prefix). You can hover over tests or files to see options like "run test(s)" or debug test(s)". When you run them, you'll see a tick or cross appear next to the test, indicating whether it passed or failed. 
+VSCode provides a helpful interface to run all test functions in your directory, and see which of them have passed. First, press the test icon on the left hand sidebar (it will look like a triangular flask). If this is your first time, then you'll need to click on the **Configure Python Tests** button, then select `pytest` as your framework (you may have to install pytest when prompted). This should automatically perform test discovery for you, showing you all the test files & functions in your current directory in the left hand window (it detects this the same way pytest does, using the `test_` prefix). You can hover over tests or files to see options like "run test(s)" or debug test(s)". When you run them, you'll see a tick or cross appear next to the test, indicating whether it passed or failed. 
 
 This is a very useful interface when you're working on a large project, because as you make updates you can easily re-run all tests, then identify & fix problems.
 
@@ -1958,3 +1938,7 @@ if MAIN:
 """, unsafe_allow_html=True)
 
 section_0()
+
+streamlit_analytics.stop_tracking(
+    unsafe_password=st.secrets["analytics_password"],
+)

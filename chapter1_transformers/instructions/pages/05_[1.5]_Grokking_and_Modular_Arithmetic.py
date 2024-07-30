@@ -1,8 +1,13 @@
-
 import os, sys
 from pathlib import Path
 chapter = r"chapter1_transformers"
-instructions_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve()
+for instructions_dir in [
+    Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/instructions").resolve(),
+    Path("/app/arena_2.0/chapter1_transformers/instructions").resolve(),
+    Path("/mount/src/arena_2.0/chapter1_transformers/instructions").resolve(),
+]:
+    if instructions_dir.exists():
+        break
 if str(instructions_dir) not in sys.path: sys.path.append(str(instructions_dir))
 os.chdir(instructions_dir)
 
@@ -13,6 +18,11 @@ st_dependencies.styling()
 
 import platform
 is_local = (platform.processor() != "")
+
+import streamlit_analytics
+streamlit_analytics.start_tracking()
+
+st.error("This is no longer the most updated version of these exercises: see [here](https://arena3-chapter1-transformer-interp.streamlit.app/) for the newest page.", icon="🚨")
 
 def section_0():
 
@@ -30,17 +40,18 @@ def section_0():
 </ul></li>""", unsafe_allow_html=True)
 
     st.markdown(r"""
+# [1.5] Grokking and Modular Arithmetic
 
-<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/wheel3-2.png" width="350">
-
-Colab: [**exercises**](https://colab.research.google.com/drive/1OCM_AlnsbC6VkaFXXp9KEYzlu_Mz8rJa) | [**solutions**](https://colab.research.google.com/drive/1vUvQVDB3oBzL2vStjY4yOoG3L2akV8vu)
+### Colab: [**exercises**](https://colab.research.google.com/drive/1OCM_AlnsbC6VkaFXXp9KEYzlu_Mz8rJa) | [**solutions**](https://colab.research.google.com/drive/1vUvQVDB3oBzL2vStjY4yOoG3L2akV8vu)
 
 Please send any problems / bugs on the `#errata` channel in the [Slack group](https://join.slack.com/t/arena-la82367/shared_invite/zt-1uvoagohe-JUv9xB7Vr143pdx1UBPrzQ), and ask any questions on the dedicated channels for this chapter of material.
 
 You can toggle dark mode from the buttons on the top-right of this page.
 
+Links to other chapters: [**(0) Fundamentals**](https://arena-ch0-fundamentals.streamlit.app/), [**(2) RL**](https://arena-ch2-rl.streamlit.app/).
+                
+<img src="https://raw.githubusercontent.com/callummcdougall/computational-thread-art/master/example_images/misc/wheel3-2.png" width="350">
 
-# [1.5] Grokking and Modular Arithmetic
 
 
 ## Introduction
@@ -186,9 +197,9 @@ from transformer_lens.hook_points import HookPoint
 from transformer_lens.components import LayerNorm
 
 # Make sure exercises are in the path
-chapter = r"chapter1_transformers"
-exercises_dir = Path(f"{os.getcwd().split(chapter)[0]}/{chapter}/exercises").resolve()
-section_dir = exercises_dir / "part5_grokking_and_modular_arithmetic"
+section_dir = Path(__file__).parent
+exercises_dir = section_dir.parent
+assert exercises_dir.name == "exercises", f"This file should be run inside 'exercises/part5_grokking_and_modular_arithmetic', not '{section_dir}'"
 if str(exercises_dir) not in sys.path: sys.path.append(str(exercises_dir))
 
 root = (section_dir / 'Grokking' / 'saved_runs').resolve()
@@ -388,9 +399,9 @@ You should get an extremely small loss (around `2.4e-07`).
 
 #### Exercise - extract key activations
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 5-10 minutes on these exercises.
 
@@ -422,9 +433,9 @@ Next, let's think about the functional form of our model's solution.
 
 ### Exercise - answer some initial questions
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 20-30 minutes on these exercises.
 
@@ -487,9 +498,9 @@ imshow(attn_mat.mean(0), xaxis='Position', yaxis='Head', title='Average Attentio
 
 ### Exercise - derive the functional form
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 20-30 minutes on these exercises.
 
@@ -620,9 +631,9 @@ Note - the $W_E$ and $W_U$ above mostly refer to the reduced matrices (hence the
 
 ### Exercise - define the effective weight matrices
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on these exercises.
 
@@ -778,9 +789,9 @@ Note also that the waves (esp. at high frequencies) look jagged, not smooth. Thi
 
 ### Exercise - create the 1D Fourier basis
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -861,9 +872,9 @@ Now that we've shown the Fourier transform is indeed an orthonormal basis, we ca
 
 ### Exercise - 1D Fourier transform
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 This should be a short, one-line function. Again, this is much more important to understand conceptually as opposed to being difficult to implement.
 ```
@@ -957,9 +968,9 @@ Although we can think of these as vectors of length $p^2$, it makes much more se
 
 ### Exercise - create the 2D Fourier basis
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 This should be a short, one-line function. Again, this is much more important to understand conceptually.
 ```
@@ -1026,9 +1037,9 @@ Let's implement this transform now!
 
 ### Exercise - Implementing the 2D Fourier Transform
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~10 minutes on this exercise.
 ```
@@ -1172,9 +1183,9 @@ imshow_fourier(
 
 ### Exercise - spot patterns in the activations
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 5-10 minutes on this exercise.
 ```
@@ -1488,9 +1499,9 @@ Let's have a closer look at some of the coefficients for these 2D Fourier basis 
 
 ### Exercise - calculate the mean squared coefficient
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to ~10 minutes on this exercise.
 
@@ -1576,9 +1587,9 @@ This is important because our model can calculate the first of these two express
 
 ### Exercise - verify the quadratic term matters, and that $\gamma > 0$
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠⚪⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵⚪⚪⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -1663,9 +1674,9 @@ Now that we've established that the neurons each seem to have some single freque
 
 ### Exercise - find neuron clusters
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-15 minutes on this exercise.
 
@@ -1860,9 +1871,9 @@ Now that we've found what appear to be neuron clusters, it's time to validate ou
 
 ### Exercise - validate neuron clusters
 
-```c
-Difficulty: 🟠🟠🟠🟠⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴🔴⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 25-40 minutes on the following exercises.
 
@@ -2174,9 +2185,9 @@ You should find that the linear and constant terms have more or less vanished re
 
 ### Exercise - validate by only taking quadratic terms
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 10-20 minutes on this exercise.
 
@@ -2593,9 +2604,9 @@ get_metrics(model, metric_cache, train_loss, 'train_loss')
 
 ### Exercise - implement excluded loss
 
-```c
-Difficulty: 🟠🟠🟠⚪⚪
-Importance: 🟠🟠🟠🟠⚪
+```yaml
+Difficulty: 🔴🔴🔴⚪⚪
+Importance: 🔵🔵🔵🔵⚪
 
 You should spend up to 20-30 minutes on this exercise.
 ```
@@ -2687,9 +2698,9 @@ We can plot the norms of the embedding of each 1D Fourier component at each epoc
 
 ### Exercise - define `fourier_embed`
 
-```c
-Difficulty: 🟠🟠⚪⚪⚪
-Importance: 🟠🟠⚪⚪⚪
+```yaml
+Difficulty: 🔴🔴⚪⚪⚪
+Importance: 🔵🔵⚪⚪⚪
 
 This exercise shouldn't take more than ~10 minutes.
 ```
@@ -2741,9 +2752,9 @@ animate_lines(
 
 ### Exercise - Examine the SVD of $W_E$
 
-```c
-Difficulty: 🟠⚪⚪⚪⚪
-Importance: 🟠🟠🟠⚪⚪
+```yaml
+Difficulty: 🔴⚪⚪⚪⚪
+Importance: 🔵🔵🔵⚪⚪
 
 You should spend up to 5-10 minutes on this exercise.
 ```
@@ -3244,7 +3255,11 @@ Some thoughts on future directions I'd be excited to see - if you're interested 
 
 
 func_page_list = [
-    (section_0, "🏠 Home"),     (section_1, "1️⃣ Periodicity & Fourier basis"),     (section_2, "2️⃣ Circuit and Feature Analysis"),     (section_3, "3️⃣ Analysis During Training"),     (section_4, "4️⃣ Discussion & Future Directions"), 
+    (section_0, "🏠 Home"),
+    (section_1, "1️⃣ Periodicity & Fourier basis"),
+    (section_2, "2️⃣ Circuit and Feature Analysis"),
+    (section_3, "3️⃣ Analysis During Training"),
+    (section_4, "4️⃣ Discussion & Future Directions"), 
 ]
 
 func_list = [func for func, page in func_page_list]
@@ -3261,3 +3276,7 @@ def page():
     func()
 
 page()
+
+streamlit_analytics.stop_tracking(
+    unsafe_password=st.secrets["analytics_password"],
+)
